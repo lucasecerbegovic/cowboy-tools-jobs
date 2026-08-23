@@ -34,7 +34,14 @@ export function ListingRow({ job }: { job: Job }) {
         </h3>
 
         <p className={`${mono.employer} mt-1.5 ${muted}`}>
-          {job.employer} · {job.city}, {job.province}
+          {/* Sits above the stretched link so it stays independently clickable. */}
+          <Link
+            href={`/employers/${job.employerSlug}`}
+            className="relative z-10 underline-offset-4 hover:underline"
+          >
+            {job.employer}
+          </Link>{' '}
+          · {job.city}, {job.province}
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">

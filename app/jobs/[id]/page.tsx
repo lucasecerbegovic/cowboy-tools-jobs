@@ -1,9 +1,11 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/badge';
 import { Button, ButtonLink } from '@/components/button';
 import { SaveButton } from '@/components/save-button';
 import { ChevronLeft } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
+import { employerOf } from '@/lib/employers';
 import {
   JOBS,
   TRADE_LABELS,
@@ -39,6 +41,7 @@ export default async function JobDetail({
   if (!job) notFound();
 
   const hasPay = job.payMin !== undefined;
+  const employer = employerOf(job);
 
   /* Spec table — labels mono, values Geist, hairline rules between rows. */
   const spec: [string, string][] = [
@@ -64,14 +67,20 @@ export default async function JobDetail({
         <article>
           <h1 className="text-job">{job.title}</h1>
           <p className={`${mono.employer} mt-2 ${muted}`}>
-            {job.employer} · {job.city}, {job.province}
+            <Link
+              href={`/employers/${job.employerSlug}`}
+              className="underline-offset-4 hover:underline"
+            >
+              {job.employer}
+            </Link>{' '}
+            · {job.city}, {job.province}
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Badge>{TYPE_LABELS[job.type]}</Badge>
             {job.union && <Badge>Union</Badge>}
             {/* Absence of verification is not a warning — unverified gets nothing. */}
-            {job.verified && <Badge tone="success">Verified employer</Badge>}
+            {employer?.verified && <Badge tone="success">Verified employer</Badge>}
           </div>
 
           <dl className="mt-10">
