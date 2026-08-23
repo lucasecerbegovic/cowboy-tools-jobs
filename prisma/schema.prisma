@@ -1,0 +1,88 @@
+// SQLite for local/dev. To use Postgres/Supabase later:
+// 1. Set DATABASE_URL to the Postgres connection string
+// 2. Change provider below from "sqlite" to "postgresql"
+// 3. Run `npx prisma migrate dev`
+// Models stay the same — no rewrite.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  employer
+  seeker
+}
+
+enum JobSource {
+  employer
+  job_bank
+  adzuna
+  usajobs
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(employer)
+  companyName  String?  @map("company_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  jobs         Job[]
+
+  @@map("profiles")
+}
+
+model Job {
+  id               String     @id @default(cuid())
+  source           JobSource
+  sourceId         String     @map("source_id")
+  title            String
+  company          String
+  description      String
+  trade            String
+  nocOrSoc         String?    @map("noc_or_soc")
+  country          String
+  region           String?
+  city             String?
+  lat              Float?
+  lng              Float?
+  isApprenticeship Boolean    @default(false) @map("is_apprenticeship")
+  employmentType   String?    @map("employment_type")
+  salaryMin        Float?     @map("salary_min")
+  salaryMax        Float?     @map("salary_max")
+  salaryCurrency   String?    @map("salary_currency")
+  applyUrl         String?    @map("apply_url")
+  applyEmail       String?    @map("apply_email")
+  postedAt         DateTime   @map("posted_at")
+  expiresAt        DateTime?  @map("expires_at")
+  raw              Json?
+  employerId       String?    @map("employer_id")
+  employer         Profile?   @relation(fields: [employerId], references: [id], onDelete: SetNull)
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  @@unique([source, sourceId])
+  @@index([trade])
+  @@index([country])
+  @@index([city])
+  @@index([isApprenticeship])
+  @@index([postedAt])
+  @@map("jobs")
+}
+
+model IngestRun {
+  id         String    @id @default(cuid())
+  source     String
+  startedAt  DateTime  @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  counts     Json?
+  error      String?
+
+  @@index([source, startedAt])
+  @@map("ingest_runs")
+}
