@@ -6,7 +6,7 @@ A job board and directory for the skilled trades. The UI is industrial and utili
 
 **Code is the source of truth.** If a value here disagrees with a canonical file, update this doc in the same change.
 
-> **Status.** Built: the token foundation, the browse slice (search, faceted results, pagination, empty states, job detail) and both form flows (post a job, apply). Still to build: the company card and the employer directory it belongs to. As each lands, check it off in [Canonical source files](#canonical-source-files) and re-measure this doc against the real implementation.
+> **Status.** Every component specified below is built: the token foundation, the browse slice (search, faceted results, pagination, empty states, job detail), both form flows (post a job, apply), and the employer directory. The doc and the code now describe the same system — keep them that way by re-measuring here whenever a value changes.
 
 ---
 
@@ -230,7 +230,7 @@ Field text and help text compile to their own tokens — `text-field` (15px) and
 - `1px solid #000`, padding `24px`, `0px` grid gap so cards share borders.
 - Logo `56×56`. Name Geist 17px/500. Trade categories as outlined badges.
 - Footer strip: mono 12px at `0.6` — `12 OPEN ROLES · CALGARY, AB`.
-- Verified employers carry a Success badge; unverified carry nothing (never a Caution badge — absence is not a warning).
+- Verified employers carry a Success badge; unverified carry nothing (never a Caution badge — absence is not a warning). `verified` is a property of the employer record, never copied onto a listing, so the two can never disagree.
 
 ### Empty states
 
@@ -297,7 +297,8 @@ Measure from these before inventing. **None exist yet** — check each off as it
 - [x] `components/listing-row.tsx` — stretched link + separate save button
 - [x] `components/filter-rail.tsx` — URL-driven facets, counts exclude own dimension
 - [x] `components/badge.tsx`
-- [ ] `components/company-card.tsx`
+- [x] `components/company-card.tsx`
+- [x] `lib/employers.ts` — employer records; `verified` lives here, not on Job
 - [x] `components/empty-state.tsx` — includes nearest-broader-query recovery
 - [x] `components/pagination.tsx`
 - [x] `components/form/fields.tsx` — text, textarea, select, checkbox, fieldset, error summary

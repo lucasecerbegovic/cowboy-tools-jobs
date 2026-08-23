@@ -14,7 +14,7 @@ export function Header() {
           <Link href="/jobs" className="hover:opacity-70">
             Jobs
           </Link>
-          <Link href="/jobs" className="text-muted hover:opacity-70">
+          <Link href="/employers" className="text-muted hover:opacity-70">
             Employers
           </Link>
         </nav>

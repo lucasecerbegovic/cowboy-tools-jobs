@@ -4,13 +4,21 @@ import { mono, monoUi } from '@/lib/brand-type';
 const COLUMNS = [
   {
     title: 'For tradespeople',
-    links: ['Browse jobs', 'Saved jobs', 'Apprenticeships', 'Wage guide'],
+    links: [
+      { label: 'Browse jobs', href: '/jobs' },
+      { label: 'Employers', href: '/employers' },
+      { label: 'Apprenticeships', href: '/jobs?type=apprenticeship' },
+      { label: 'Union roles', href: '/jobs?union=1' },
+    ],
   },
   {
     title: 'For employers',
-    links: ['Post a job', 'Pricing', 'Employer login', 'Hiring resources'],
+    links: [
+      { label: 'Post a job', href: '/post' },
+      { label: 'Directory', href: '/employers' },
+    ],
   },
-  { title: 'Company', links: ['About', 'Contact', 'Privacy', 'Terms'] },
+  { title: 'Company', links: [{ label: 'About', href: '/employers' }] },
 ];
 
 export function Footer() {
@@ -46,12 +54,12 @@ export function Footer() {
               <h2 className={`${monoUi} text-surface/60`}>{col.title}</h2>
               <ul className="mt-4 flex flex-col gap-3">
                 {col.links.map((l) => (
-                  <li key={l}>
+                  <li key={l.href}>
                     <Link
-                      href="/jobs"
+                      href={l.href}
                       className="text-body-sm transition-opacity duration-150 hover:opacity-70"
                     >
-                      {l}
+                      {l.label}
                     </Link>
                   </li>
                 ))}
