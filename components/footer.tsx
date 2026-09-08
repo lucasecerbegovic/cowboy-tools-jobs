@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { mono, monoUi } from '@/lib/brand-type';
+import { SITE_NAME } from '@/lib/site';
 
 const COLUMNS = [
   {
@@ -27,7 +28,7 @@ export function Footer() {
       <div className="mx-auto max-w-[var(--content-max)] px-4 py-14 md:px-8">
         <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]">
           <div>
-            <p className={monoUi}>Tradesboard</p>
+            <p className={monoUi}>{SITE_NAME}</p>
             <p className={`${mono.meta} mt-4 text-surface/60`}>
               Canada
             </p>
@@ -71,7 +72,7 @@ export function Footer() {
         <div
           className={`${mono.meta} mt-12 border-t border-hairline pt-6 text-surface/60`}
         >
-          © 2026 Tradesboard
+          © 2026 {SITE_NAME}
         </div>
       </div>
     </footer>

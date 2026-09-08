@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { employerOgCopy, jobOgCopy, siteOgCopy } from '@/lib/og/copy';
 import type { Job } from '@/lib/jobs';
-import { getMetadataBase, normalizeSiteUrl } from '@/lib/site';
+import { getMetadataBase, normalizeSiteUrl, SITE_NAME } from '@/lib/site';
 
 const sample: Job = {
   id: 'je-4401',
@@ -27,7 +27,7 @@ const sample: Job = {
 
 test('site OG copy is the homepage headline and trade strip', () => {
   const copy = siteOgCopy();
-  assert.equal(copy.brand, 'Tradesboard');
+  assert.equal(copy.brand, SITE_NAME);
   assert.equal(copy.headline, 'Work in the trades');
   assert.equal(copy.locale, 'Canada');
   assert.match(copy.trades, /Electrical/);
@@ -76,8 +76,8 @@ test('employer OG copy pluralizes open roles and marks verified', () => {
 });
 
 test('normalizeSiteUrl adds https except for localhost', () => {
-  assert.equal(normalizeSiteUrl('https://tradesboard.com/').href, 'https://tradesboard.com/');
-  assert.equal(normalizeSiteUrl('tradesboard.com').href, 'https://tradesboard.com/');
+  assert.equal(normalizeSiteUrl('https://jobs.cowboytools.ca/').href, 'https://jobs.cowboytools.ca/');
+  assert.equal(normalizeSiteUrl('jobs.cowboytools.ca').href, 'https://jobs.cowboytools.ca/');
   assert.equal(normalizeSiteUrl('localhost:8081').href, 'http://localhost:8081/');
 });
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { OgBadge, OgBadgeTone } from '@/lib/og/copy';
+import { SITE_NAME } from '@/lib/site';
 
 const INK = '#000';
 const SURFACE = '#fff';
@@ -53,7 +54,7 @@ function BrandMark({ aside }: { aside?: string }) {
           color: INK,
         }}
       >
-        Tradesboard
+        {SITE_NAME}
       </div>
       {aside ? (
         <div

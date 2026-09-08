@@ -6,6 +6,7 @@ import { isEmploymentType, isTrade, toIngestTrade } from '@/lib/jobs';
 import { slugify } from '@/lib/slug';
 import { formatJobTitle } from '@/lib/format-title';
 import { inferEmployerBranding } from '@/lib/employer-logo';
+import { SITE_NAME } from '@/lib/site';
 
 /** Cross-field rule the per-field schema cannot express. */
 function payRangeError(data: Record<string, string>): Errors {
@@ -64,7 +65,7 @@ export async function postJob(
       city: values.city,
       province: values.province,
       country: 'CA',
-      about: `${values.employer} posts roles directly on Tradesboard.`,
+      about: `${values.employer} posts roles directly on ${SITE_NAME}.`,
       website: branding.website,
       logoUrl: branding.logoUrl,
     },

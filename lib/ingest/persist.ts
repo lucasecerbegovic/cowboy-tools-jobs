@@ -7,6 +7,7 @@ import {
   inferEmployerBranding,
   isGenericEmployerName,
 } from '@/lib/employer-logo';
+import { SITE_NAME } from '@/lib/site';
 
 type DbClient = Prisma.TransactionClient | typeof prisma;
 
@@ -24,7 +25,7 @@ export function employerSlugFor(
 function aboutForSource(source: JobSource, name: string): string {
   switch (source) {
     case 'employer':
-      return `${name} posts roles directly on Tradesboard.`;
+      return `${name} posts roles directly on ${SITE_NAME}.`;
     case 'job_bank':
       return `Listings aggregated from Job Bank open data (Employment and Social Development Canada), licensed under the Open Government Licence – Canada.`;
     case 'adzuna':

@@ -2,7 +2,7 @@
  * Canonical site identity for <title>, Open Graph, and Twitter cards.
  * metadataBase must be absolute so crawlers accept og:image.
  */
-export const SITE_NAME = 'Tradesboard';
+export const SITE_NAME = 'Cowboy Tools Jobs';
 export const SITE_DESCRIPTION = 'Jobs and employers in the skilled trades in Canada.';
 export const SITE_TAGLINE = 'Work in the trades';
 

@@ -170,7 +170,7 @@ const EMPLOYERS: SeedEmployer[] = [
     founded: 1996,
     size: '80–120 staff',
     about:
-      'Commercial mechanical and electrical contractor across the GTA and Ottawa. Direct employer postings on Tradesboard.',
+      'Commercial mechanical and electrical contractor across the GTA and Ottawa. Direct employer postings on Cowboy Tools Jobs.',
     logoUrl: mark('northline-mechanical'),
   },
 ];

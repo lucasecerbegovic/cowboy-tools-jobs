@@ -2,9 +2,10 @@ import { OG_SIZE, fallbackOgCopy, jobOgCopy } from '@/lib/og/copy';
 import { JobOgCard, SiteOgCard } from '@/lib/og/frame';
 import { renderOgImage } from '@/lib/og/render';
 import { getJob } from '@/lib/store';
+import { SITE_NAME } from '@/lib/site';
 
 export const runtime = 'nodejs';
-export const alt = 'Skilled trades job on Tradesboard';
+export const alt = `Skilled trades job on ${SITE_NAME}`;
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 

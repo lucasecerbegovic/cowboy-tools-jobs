@@ -6,6 +6,7 @@ import { ChevronLeft } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
 import { applyTarget, formatPay } from '@/lib/jobs';
 import { getJob } from '@/lib/store';
+import { SITE_NAME } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,7 @@ export default async function ApplyPage({
             <p className={monoUi}>Apply on the original listing</p>
             <p className={`mt-4 text-body ${muted}`}>
               This role is aggregated from an external board. Applications go
-              through the source listing, not Tradesboard.
+              through the source listing, not {SITE_NAME}.
             </p>
             <ButtonAnchor
               href={apply.href}

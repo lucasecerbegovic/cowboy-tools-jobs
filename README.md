@@ -1,6 +1,6 @@
-# Tradesboard
+# Cowboy Tools Jobs
 
-Job board for skilled trades gigs and apprenticeships in Canada.
+Job board for skilled trades gigs and apprenticeships in Canada. Production: [jobs.cowboytools.ca](https://jobs.cowboytools.ca).
 
 ## Local setup
 
