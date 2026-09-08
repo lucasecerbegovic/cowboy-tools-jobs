@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { filterEmployers, type Employer } from '@/lib/employers';
+import { filterEmployers, toEmployerCard, type Employer } from '@/lib/employers';
 
 const EMPLOYERS: Employer[] = [
   {
@@ -71,4 +71,26 @@ test('name search is case-insensitive and matches city too', () => {
 
 test('empty filters return everything', () => {
   assert.equal(filterEmployers(EMPLOYERS, { trade: [] }).length, EMPLOYERS.length);
+});
+
+test('directory cards tally trades without carrying about copy', () => {
+  const card = toEmployerCard(
+    {
+      slug: 'northline-electric',
+      name: 'Northline Electric',
+      verified: true,
+      city: 'Calgary',
+      province: 'AB',
+      logoUrl: null,
+      website: null,
+    },
+    [
+      { employerSlug: 'northline-electric', trade: 'electrical' },
+      { employerSlug: 'northline-electric', trade: 'electrical' },
+      { employerSlug: 'other-co', trade: 'hvac' },
+    ],
+  );
+  assert.equal(card.openRoles, 2);
+  assert.deepEqual(card.trades, ['electrical']);
+  assert.equal('about' in card, false);
 });

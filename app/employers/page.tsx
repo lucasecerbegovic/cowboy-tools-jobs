@@ -2,12 +2,16 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CompanyCard } from '@/components/company-card';
 import { EmptyState } from '@/components/empty-state';
+import { Pagination } from '@/components/pagination';
 import { Search } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
 import { filterEmployers } from '@/lib/employers';
 import { TRADE_LABELS, isTrade } from '@/lib/jobs';
+import { paginate } from '@/lib/pagination';
 import { listEmployers } from '@/lib/store';
 import { asArray, href, toggleParam, type Query } from '@/lib/url';
+
+const PER_PAGE = 18;
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +31,11 @@ export default async function EmployersPage({
   const employers = await listEmployers();
 
   const results = filterEmployers(employers, { q, trade: selected });
+  const { page, totalPages, items: pageItems } = paginate(
+    results,
+    Number(sp.page) || 1,
+    PER_PAGE,
+  );
 
   /* Only offer trades some employer is actually hiring for. */
   const available = (Object.keys(TRADE_LABELS) as Array<keyof typeof TRADE_LABELS>).filter(
@@ -49,6 +58,9 @@ export default async function EmployersPage({
             className="h-[var(--field-h)] w-full bg-surface px-4 text-field outline-none placeholder:text-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
           />
         </label>
+        {selected.map((t) => (
+          <input key={t} type="hidden" name="trade" value={t} />
+        ))}
         <button
           type="submit"
           className={`${mono.button} flex shrink-0 items-center gap-2 bg-ink px-5 text-surface transition-opacity duration-150 hover:opacity-70`}
@@ -84,17 +96,34 @@ export default async function EmployersPage({
         )}
       </div>
 
-      <h2 className={`${monoUi} mt-10 border-b border-ink pb-3`}>
-        {results.length} {results.length === 1 ? 'company' : 'companies'}
-      </h2>
+      <div className="mt-10 flex items-baseline justify-between gap-4 border-b border-ink pb-3">
+        <h2 className={monoUi}>
+          {results.length} {results.length === 1 ? 'company' : 'companies'}
+        </h2>
+        {totalPages > 1 && (
+          <p className={`${mono.meta} ${muted}`}>
+            Page {page} of {totalPages}
+          </p>
+        )}
+      </div>
 
-      {results.length > 0 ? (
-        /* Negative margins collapse adjacent card borders into shared rules. */
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 [&>*]:-ml-px [&>*]:-mt-px">
-          {results.map((e) => (
-            <CompanyCard key={e.slug} employer={e} />
-          ))}
-        </div>
+      {pageItems.length > 0 ? (
+        <>
+          {/* Negative margins collapse adjacent card borders into shared rules. */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 [&>*]:-ml-px [&>*]:-mt-px">
+            {pageItems.map((e) => (
+              <CompanyCard key={e.slug} employer={e} />
+            ))}
+          </div>
+          <div className="mt-8">
+            <Pagination
+              query={sp}
+              page={page}
+              totalPages={totalPages}
+              base="/employers"
+            />
+          </div>
+        </>
       ) : (
         <div className="mt-10">
           <EmptyState

@@ -16,6 +16,7 @@ import {
   isTrade,
   type Filters,
 } from '@/lib/jobs';
+import { paginate } from '@/lib/pagination';
 import { listJobs } from '@/lib/store';
 import { asArray, href, removeParam, type Query } from '@/lib/url';
 
@@ -69,9 +70,11 @@ export default async function JobsPage({
 
   const unionCount = filterJobs(jobs, { ...filters, union: true }).length;
 
-  const totalPages = Math.max(1, Math.ceil(results.length / PER_PAGE));
-  const page = Math.min(totalPages, Math.max(1, Number(sp.page) || 1));
-  const pageItems = results.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const { page, totalPages, items: pageItems } = paginate(
+    results,
+    Number(sp.page) || 1,
+    PER_PAGE,
+  );
 
   /* Active filters, rendered as removable chips above the results. */
   const chips = [

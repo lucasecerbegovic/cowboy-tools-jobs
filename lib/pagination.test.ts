@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { paginationItems } from '@/lib/pagination';
+import { paginate, paginationItems } from '@/lib/pagination';
 
 test('small sets list every page', () => {
   assert.deepEqual(paginationItems(1, 1), [1]);
@@ -29,4 +29,15 @@ test('out-of-range pages clamp to the nearest real page', () => {
 
 test('empty totals produce no items', () => {
   assert.deepEqual(paginationItems(1, 0), []);
+});
+
+test('paginate slices a window and clamps the requested page', () => {
+  const items = Array.from({ length: 40 }, (_, i) => i + 1);
+  assert.deepEqual(paginate(items, 1, 18).items, items.slice(0, 18));
+  assert.equal(paginate(items, 1, 18).totalPages, 3);
+  assert.deepEqual(paginate(items, 3, 18).items, items.slice(36));
+  assert.equal(paginate(items, 99, 18).page, 3);
+  assert.equal(paginate(items, 0, 18).page, 1);
+  assert.deepEqual(paginate([], 1, 18).items, []);
+  assert.equal(paginate([], 1, 18).totalPages, 1);
 });

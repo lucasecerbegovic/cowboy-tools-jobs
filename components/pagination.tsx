@@ -4,11 +4,11 @@ import { mono, muted } from '@/lib/brand-type';
 import { paginationItems } from '@/lib/pagination';
 import { href, toParams, type Query } from '@/lib/url';
 
-function pageHref(query: Query, page: number) {
+function pageHref(base: string, query: Query, page: number) {
   const p = toParams(query);
   if (page <= 1) p.delete('page');
   else p.set('page', String(page));
-  return href('/jobs', p);
+  return href(base, p);
 }
 
 const cell =
@@ -18,10 +18,12 @@ export function Pagination({
   query,
   page,
   totalPages,
+  base = '/jobs',
 }: {
   query: Query;
   page: number;
   totalPages: number;
+  base?: string;
 }) {
   if (totalPages <= 1) return null;
   const items = paginationItems(page, totalPages);
@@ -30,7 +32,7 @@ export function Pagination({
     <nav aria-label="Pagination" className={`${mono.badge} flex flex-wrap`}>
       {page > 1 ? (
         <Link
-          href={pageHref(query, page - 1)}
+          href={pageHref(base, query, page - 1)}
           rel="prev"
           aria-label="Previous page"
           className={`${cell} -mr-px hover:bg-row-hover`}
@@ -56,7 +58,7 @@ export function Pagination({
         ) : (
           <Link
             key={item}
-            href={pageHref(query, item)}
+            href={pageHref(base, query, item)}
             aria-label={`Page ${item}`}
             aria-current={item === page ? 'page' : undefined}
             className={`${cell} -mr-px ${
@@ -70,7 +72,7 @@ export function Pagination({
 
       {page < totalPages ? (
         <Link
-          href={pageHref(query, page + 1)}
+          href={pageHref(base, query, page + 1)}
           rel="next"
           aria-label="Next page"
           className={`${cell} hover:bg-row-hover`}

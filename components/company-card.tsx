@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { Badge } from '@/components/badge';
 import { EmployerLogo } from '@/components/ui/employer-logo';
 import { mono, muted } from '@/lib/brand-type';
-import { type Employer } from '@/lib/employers';
+import { type EmployerCard } from '@/lib/employers';
 import { TRADE_LABELS } from '@/lib/jobs';
 
 /** Spec: docs/brand-guidelines.md § Company card */
-export function CompanyCard({ employer }: { employer: Employer }) {
+export function CompanyCard({ employer }: { employer: EmployerCard }) {
   const trades = employer.trades;
   const roles = employer.openRoles;
 

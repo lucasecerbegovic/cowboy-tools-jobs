@@ -31,11 +31,14 @@ export type EmployerRecord = {
   logoUrl: string | null;
 };
 
+function tradesFromJobs(jobs: { trade: Trade }[]): Trade[] {
+  const seen = new Set<Trade>();
+  for (const j of jobs) seen.add(j.trade);
+  return (Object.keys(TRADE_LABELS) as Trade[]).filter((t) => seen.has(t));
+}
+
 export function toEmployer(row: EmployerRecord, jobs: Job[]): Employer {
   const mine = jobs.filter((j) => j.employerSlug === row.slug);
-  const seen = new Set<Trade>();
-  for (const j of mine) seen.add(j.trade);
-  const trades = (Object.keys(TRADE_LABELS) as Trade[]).filter((t) => seen.has(t));
   return {
     slug: row.slug,
     name: row.name,
@@ -46,7 +49,7 @@ export function toEmployer(row: EmployerRecord, jobs: Job[]): Employer {
     founded: row.founded ?? undefined,
     size: row.size ?? undefined,
     about: row.about,
-    trades,
+    trades: tradesFromJobs(mine),
     openRoles: mine.length,
     website: row.website ?? undefined,
     logoUrl: resolveEmployerLogo({
@@ -58,12 +61,47 @@ export function toEmployer(row: EmployerRecord, jobs: Job[]): Employer {
   };
 }
 
+/** Directory cards — no about/body, no unused profile fields. */
+export type EmployerCard = Pick<
+  Employer,
+  'slug' | 'name' | 'verified' | 'city' | 'province' | 'trades' | 'openRoles' | 'logoUrl'
+>;
+
+export type EmployerJobTally = {
+  employerSlug: string;
+  trade: Trade;
+};
+
+export function toEmployerCard(
+  row: Pick<
+    EmployerRecord,
+    'slug' | 'name' | 'verified' | 'city' | 'province' | 'logoUrl' | 'website'
+  >,
+  jobs: EmployerJobTally[],
+): EmployerCard {
+  const mine = jobs.filter((j) => j.employerSlug === row.slug);
+  return {
+    slug: row.slug,
+    name: row.name,
+    verified: row.verified,
+    city: row.city,
+    province: row.province,
+    trades: tradesFromJobs(mine),
+    openRoles: mine.length,
+    logoUrl: resolveEmployerLogo({
+      name: row.name,
+      slug: row.slug,
+      logoUrl: row.logoUrl,
+      website: row.website,
+    }),
+  };
+}
+
 export type EmployerFilters = { q?: string; trade: Trade[] };
 
-export function filterEmployers(
-  employers: Employer[],
-  f: EmployerFilters,
-): Employer[] {
+export function filterEmployers<
+  T extends Pick<Employer, 'name' | 'city' | 'province' | 'trades'>,
+>(employers: T[], f: EmployerFilters): T[] {
   return employers.filter((e) => {
     if (f.q) {
       const hay = `${e.name} ${e.city} ${e.province}`.toLowerCase();
