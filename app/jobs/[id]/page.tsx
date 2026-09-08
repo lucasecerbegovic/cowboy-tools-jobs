@@ -1,34 +1,40 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/badge';
-import { Button, ButtonLink } from '@/components/button';
-import { SaveButton } from '@/components/save-button';
+import { ButtonAnchor, ButtonLink } from '@/components/button';
+import { ShareButton } from '@/components/share-button';
 import { ChevronLeft } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
-import { employerOf } from '@/lib/employers';
 import {
-  JOBS,
   TRADE_LABELS,
   TYPE_LABELS,
+  applyTarget,
   formatPay,
   formatPosted,
-  getJob,
 } from '@/lib/jobs';
+import { getEmployer, getJob } from '@/lib/store';
 
-export function generateStaticParams() {
-  return JOBS.map((j) => ({ id: j.id }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const job = getJob((await params).id);
-  if (!job) return { title: 'Job not found — Tradesboard' };
+  const job = await getJob((await params).id);
+  if (!job) return { title: 'Job not found' };
   return {
-    title: `${job.title} — ${job.employer} — Tradesboard`,
+    title: `${job.title} — ${job.employer}`,
     description: job.summary,
+    openGraph: {
+      title: `${job.title} — ${job.employer}`,
+      description: job.summary,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${job.title} — ${job.employer}`,
+      description: job.summary,
+    },
   };
 }
 
@@ -37,11 +43,12 @@ export default async function JobDetail({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const job = getJob((await params).id);
+  const job = await getJob((await params).id);
   if (!job) notFound();
 
   const hasPay = job.payMin !== undefined;
-  const employer = employerOf(job);
+  const employer = await getEmployer(job.employerSlug);
+  const apply = applyTarget(job);
 
   /* Spec table — labels mono, values Geist, hairline rules between rows. */
   const spec: [string, string][] = [
@@ -77,8 +84,9 @@ export default async function JobDetail({
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Badge>{TYPE_LABELS[job.type]}</Badge>
-            {job.union && <Badge>Union</Badge>}
+            <Badge tone={job.type}>{TYPE_LABELS[job.type]}</Badge>
+            {job.source === 'adzuna' && <Badge>Jobs by Adzuna</Badge>}
+            {job.union && <Badge tone="union">Union</Badge>}
             {/* Absence of verification is not a warning — unverified gets nothing. */}
             {employer?.verified && <Badge tone="success">Verified employer</Badge>}
           </div>
@@ -105,21 +113,25 @@ export default async function JobDetail({
 
           <div className="mt-10 max-w-[68ch]">
             <h2 className={`${monoUi} border-b border-ink pb-3`}>About the role</h2>
-            <p className="mt-5 text-body">{job.summary}</p>
+            <p className="mt-5 whitespace-pre-line text-body">{job.summary}</p>
 
-            <h2 className={`${monoUi} mt-10 border-b border-ink pb-3`}>
-              Responsibilities
-            </h2>
-            <ul className="mt-5 flex flex-col gap-3">
-              {job.responsibilities.map((r) => (
-                <li key={r} className="flex gap-3 text-body">
-                  <span aria-hidden className={muted}>
-                    —
-                  </span>
-                  <span>{r}</span>
-                </li>
-              ))}
-            </ul>
+            {job.responsibilities.length > 0 && (
+              <>
+                <h2 className={`${monoUi} mt-10 border-b border-ink pb-3`}>
+                  Responsibilities
+                </h2>
+                <ul className="mt-5 flex flex-col gap-3">
+                  {job.responsibilities.map((r) => (
+                    <li key={r} className="flex gap-3 text-body">
+                      <span aria-hidden className={muted}>
+                        —
+                      </span>
+                      <span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         </article>
 
@@ -132,15 +144,24 @@ export default async function JobDetail({
               {formatPosted(job.postedDaysAgo)}
             </p>
 
-            <ButtonLink href={`/jobs/${job.id}/apply`} size="lg" className="mt-6 w-full">
-              Apply now
-            </ButtonLink>
+            {apply.external ? (
+              <ButtonAnchor
+                href={apply.href}
+                size="lg"
+                className="mt-6 w-full"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Apply on listing
+              </ButtonAnchor>
+            ) : (
+              <ButtonLink href={apply.href} size="lg" className="mt-6 w-full">
+                Apply now
+              </ButtonLink>
+            )}
 
-            <div className="mt-4 flex items-center justify-between">
-              <SaveButton title={job.title} />
-              <Button variant="bare" size="sm">
-                Share
-              </Button>
+            <div className="mt-4">
+              <ShareButton title={job.title} href={`/jobs/${job.id}`} />
             </div>
           </div>
         </aside>

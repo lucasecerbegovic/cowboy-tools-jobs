@@ -4,12 +4,15 @@ import { CompanyCard } from '@/components/company-card';
 import { EmptyState } from '@/components/empty-state';
 import { Search } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
-import { EMPLOYERS, employerTrades, filterEmployers } from '@/lib/employers';
-import { TRADE_LABELS, type Trade } from '@/lib/jobs';
+import { filterEmployers } from '@/lib/employers';
+import { TRADE_LABELS, isTrade } from '@/lib/jobs';
+import { listEmployers } from '@/lib/store';
 import { asArray, href, toggleParam, type Query } from '@/lib/url';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
-  title: 'Employers — Tradesboard',
+  title: 'Employers',
   description: 'Companies hiring in the skilled trades.',
 };
 
@@ -20,13 +23,14 @@ export default async function EmployersPage({
 }) {
   const sp = await searchParams;
   const q = typeof sp.q === 'string' && sp.q ? sp.q : undefined;
-  const selected = asArray(sp.trade) as Trade[];
+  const selected = asArray(sp.trade).filter(isTrade);
+  const employers = await listEmployers();
 
-  const results = filterEmployers(EMPLOYERS, { q, trade: selected });
+  const results = filterEmployers(employers, { q, trade: selected });
 
   /* Only offer trades some employer is actually hiring for. */
-  const available = (Object.keys(TRADE_LABELS) as Trade[]).filter((t) =>
-    EMPLOYERS.some((e) => employerTrades(e.slug).includes(t)),
+  const available = (Object.keys(TRADE_LABELS) as Array<keyof typeof TRADE_LABELS>).filter(
+    (t) => employers.some((e) => e.trades.includes(t)),
   );
 
   return (

@@ -3,13 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "next dev -p 8081",
+    "build": "prisma generate && next build",
+    "start": "next start -p 8081",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --import ./scripts/register.mjs --test 'lib/**/*.test.ts'"
+    "test": "node --experimental-strip-types --import ./scripts/register.mjs --test 'lib/**/*.test.ts'",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "db:setup": "prisma migrate dev && prisma db seed",
+    "ingest": "node --env-file=.env --import tsx scripts/ingest.ts",
+    "ingest:job-bank": "node --env-file=.env --import tsx scripts/ingest.ts job_bank",
+    "ingest:job-bank:west": "node --env-file=.env --import tsx scripts/ingest.ts job_bank --live --west",
+    "ingest:adzuna": "node --env-file=.env --import tsx scripts/ingest.ts adzuna",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "csv-parse": "^7.0.2",
     "next": "^15.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -19,7 +34,12 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "prisma": "6.19.3",
     "tailwindcss": "^4.1.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "prisma", "@prisma/engines"]
   }
 }

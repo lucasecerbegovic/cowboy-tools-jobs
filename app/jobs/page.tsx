@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { BADGE_TONES, isBadgeTone } from '@/components/badge';
 import { EmptyState } from '@/components/empty-state';
 import { FilterRail } from '@/components/filter-rail';
 import { ListingRow } from '@/components/listing-row';
@@ -7,17 +9,30 @@ import { SearchField } from '@/components/search-field';
 import { Close } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
 import {
-  JOBS,
   TRADE_LABELS,
   TYPE_LABELS,
   filterJobs,
-  type EmploymentType,
+  isEmploymentType,
+  isTrade,
   type Filters,
-  type Trade,
 } from '@/lib/jobs';
+import { listJobs } from '@/lib/store';
 import { asArray, href, removeParam, type Query } from '@/lib/url';
 
-const PER_PAGE = 6;
+const PER_PAGE = 18;
+
+function chipTone(key: string, value: string | undefined): string {
+  if (key === 'union') return BADGE_TONES.union;
+  if (key === 'type' && value && isBadgeTone(value)) return BADGE_TONES[value];
+  return 'border-ink bg-ink text-surface';
+}
+
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Jobs',
+  description: 'Browse skilled trades jobs in Canada.',
+};
 
 export default async function JobsPage({
   searchParams,
@@ -25,36 +40,37 @@ export default async function JobsPage({
   searchParams: Promise<Query>;
 }) {
   const sp = await searchParams;
+  const jobs = await listJobs();
 
   const filters: Filters = {
     q: typeof sp.q === 'string' && sp.q ? sp.q : undefined,
     loc: typeof sp.loc === 'string' && sp.loc ? sp.loc : undefined,
-    trade: asArray(sp.trade) as Trade[],
-    type: asArray(sp.type) as EmploymentType[],
+    trade: asArray(sp.trade).filter(isTrade),
+    type: asArray(sp.type).filter(isEmploymentType),
     union: sp.union === '1',
   };
 
-  const results = filterJobs(JOBS, filters);
+  const results = filterJobs(jobs, filters);
 
   /* Facet counts exclude their own dimension, so a count never reads as zero
      just because you already narrowed by it. */
-  const tradeCounts = (t: Trade) =>
-    filterJobs(JOBS, { ...filters, trade: [t] }).length;
-  const typeCounts = (t: EmploymentType) =>
-    filterJobs(JOBS, { ...filters, type: [t] }).length;
+  const tradeCounts = (t: (typeof filters.trade)[number]) =>
+    filterJobs(jobs, { ...filters, trade: [t] }).length;
+  const typeCounts = (t: (typeof filters.type)[number]) =>
+    filterJobs(jobs, { ...filters, type: [t] }).length;
 
-  const trades = (Object.keys(TRADE_LABELS) as Trade[])
+  const trades = (Object.keys(TRADE_LABELS) as Array<keyof typeof TRADE_LABELS>)
     .map((v) => ({ value: v, label: TRADE_LABELS[v], count: tradeCounts(v) }))
     .filter((o) => o.count > 0 || filters.trade.includes(o.value));
 
-  const types = (Object.keys(TYPE_LABELS) as EmploymentType[])
+  const types = (Object.keys(TYPE_LABELS) as Array<keyof typeof TYPE_LABELS>)
     .map((v) => ({ value: v, label: TYPE_LABELS[v], count: typeCounts(v) }))
     .filter((o) => o.count > 0 || filters.type.includes(o.value));
 
-  const unionCount = filterJobs(JOBS, { ...filters, union: true }).length;
+  const unionCount = filterJobs(jobs, { ...filters, union: true }).length;
 
-  const page = Math.max(1, Number(sp.page) || 1);
   const totalPages = Math.max(1, Math.ceil(results.length / PER_PAGE));
+  const page = Math.min(totalPages, Math.max(1, Number(sp.page) || 1));
   const pageItems = results.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   /* Active filters, rendered as removable chips above the results. */
@@ -90,7 +106,7 @@ export default async function JobsPage({
           c.key === 'type' ? filters.type.filter((t) => t !== c.value) : filters.type,
         union: c.key === 'union' ? false : filters.union,
       };
-      return { label: c.label, href: href('/jobs', next), count: filterJobs(JOBS, f).length };
+      return { label: c.label, href: href('/jobs', next), count: filterJobs(jobs, f).length };
     })
     .filter((c) => c.count > 0)
     .sort((a, b) => b.count - a.count)[0];
@@ -105,7 +121,7 @@ export default async function JobsPage({
             <Link
               key={`${c.key}-${c.value ?? ''}`}
               href={href('/jobs', removeParam(sp, c.key, c.value))}
-              className={`${mono.badge} inline-flex items-center gap-2 bg-ink py-1.5 pl-3 pr-2 text-surface transition-opacity duration-150 hover:opacity-70`}
+              className={`${mono.badge} inline-flex items-center gap-2 border py-1.5 pl-3 pr-2 transition-opacity duration-150 hover:opacity-70 ${chipTone(c.key, c.value)}`}
             >
               {c.label}
               <Close size={13} />

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Badge } from '@/components/badge';
-import { SaveButton } from '@/components/save-button';
+import { ShareButton } from '@/components/share-button';
+import { EmployerLogo } from '@/components/ui/employer-logo';
 import { mono, muted } from '@/lib/brand-type';
 import { formatPay, formatPosted, TYPE_LABELS, type Job } from '@/lib/jobs';
 
@@ -15,16 +16,16 @@ export function ListingRow({ job }: { job: Job }) {
 
   return (
     <article className="group relative flex min-h-[var(--row-min-h)] items-start gap-4 border border-ink px-6 py-5 transition-colors duration-150 hover:bg-row-hover">
-      <div
-        aria-hidden
-        className={`${mono.badge} hidden h-12 w-12 shrink-0 items-center justify-center border border-ink sm:flex`}
-      >
-        {job.employer.slice(0, 2).toUpperCase()}
-      </div>
+      <EmployerLogo
+        name={job.employer}
+        src={job.employerLogo}
+        size="sm"
+        className="max-sm:hidden"
+      />
 
       <div className="min-w-0 flex-1">
         <h3 className="text-row-title">
-          {/* Stretched link: one accessible target, save button stays separate. */}
+          {/* Stretched link: one accessible target, share button stays separate. */}
           <Link
             href={`/jobs/${job.id}`}
             className="after:absolute after:inset-0 hover:underline underline-offset-4"
@@ -48,14 +49,15 @@ export function ListingRow({ job }: { job: Job }) {
           <span className={`${mono.pay} ${hasPay ? 'text-ink' : muted}`}>
             {formatPay(job)}
           </span>
-          <Badge>{TYPE_LABELS[job.type]}</Badge>
-          {job.union && <Badge>Union</Badge>}
+          <Badge tone={job.type}>{TYPE_LABELS[job.type]}</Badge>
+          {job.source === 'adzuna' && <Badge>Jobs by Adzuna</Badge>}
+          {job.union && <Badge tone="union">Union</Badge>}
           {closingSoon && <Badge tone="urgent">Closes in {job.closesInDays}d</Badge>}
         </div>
       </div>
 
       <div className="flex shrink-0 flex-col items-end gap-3">
-        <SaveButton title={job.title} />
+        <ShareButton title={job.title} href={`/jobs/${job.id}`} />
         <span className={`${mono.meta} ${muted} hidden sm:block`}>
           {formatPosted(job.postedDaysAgo)}
         </span>

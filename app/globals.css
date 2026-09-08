@@ -106,6 +106,21 @@
   --color-caution: #b54708; /* 5.43:1 */
   --color-success: #067647; /* 5.69:1 */
 
+  /* Light fills behind 11px badge text. Each pair is ≥ 4.5:1. */
+  --color-urgent-fill: #f8ddd9;
+  --color-caution-fill: #f8e4cc;
+
+  --color-badge-full-time: #163a5f;
+  --color-badge-full-time-fill: #d5e6f5;
+  --color-badge-part-time: #6b2d5b;
+  --color-badge-part-time-fill: #f3d9ec;
+  --color-badge-contract: #8c3a16;
+  --color-badge-contract-fill: #f6dcce;
+  --color-badge-apprenticeship: #7a4a00;
+  --color-badge-apprenticeship-fill: #f3e0b5;
+  --color-badge-union: #1b4f72;
+  --color-badge-union-fill: #d0e6f5;
+
   /* --- Radius (§ Non-negotiable 2) ----------------------------
      Scale is RESET so `rounded-lg` / `rounded-xl` do not exist.
      Nothing above 4px is reachable. */

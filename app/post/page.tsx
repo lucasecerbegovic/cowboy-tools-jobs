@@ -3,7 +3,7 @@ import { PostJobForm } from '@/components/post-job-form';
 import { monoUi, muted } from '@/lib/brand-type';
 
 export const metadata: Metadata = {
-  title: 'Post a job — Tradesboard',
+  title: 'Post a job',
   description: 'List a role in the skilled trades.',
 };
 
@@ -13,8 +13,8 @@ export default function PostJobPage() {
       <p className={`${monoUi} ${muted}`}>For employers</p>
       <h1 className="mt-3 text-page-title">Post a job</h1>
       <p className={`mt-4 max-w-[60ch] text-body ${muted}`}>
-        Listings are reviewed before they go live. Posting pay is optional but
-        it is the single strongest predictor of applications.
+        Listings go live immediately. Posting pay is optional but it is the
+        single strongest predictor of applications.
       </p>
       <div className="mt-12">
         <PostJobForm />

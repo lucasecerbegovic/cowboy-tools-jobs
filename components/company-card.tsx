@@ -1,23 +1,19 @@
 import Link from 'next/link';
 import { Badge } from '@/components/badge';
+import { EmployerLogo } from '@/components/ui/employer-logo';
 import { mono, muted } from '@/lib/brand-type';
-import { employerTrades, openRoleCount, type Employer } from '@/lib/employers';
+import { type Employer } from '@/lib/employers';
 import { TRADE_LABELS } from '@/lib/jobs';
 
 /** Spec: docs/brand-guidelines.md § Company card */
 export function CompanyCard({ employer }: { employer: Employer }) {
-  const trades = employerTrades(employer.slug);
-  const roles = openRoleCount(employer.slug);
+  const trades = employer.trades;
+  const roles = employer.openRoles;
 
   return (
     <article className="group relative flex flex-col border border-ink p-6 transition-colors duration-150 hover:bg-row-hover">
       <div className="flex items-start gap-4">
-        <div
-          aria-hidden
-          className={`${mono.badge} flex h-14 w-14 shrink-0 items-center justify-center border border-ink`}
-        >
-          {employer.name.slice(0, 2).toUpperCase()}
-        </div>
+        <EmployerLogo name={employer.name} src={employer.logoUrl} size="md" />
         <div className="min-w-0 flex-1">
           <h3 className="text-row-title">
             <Link

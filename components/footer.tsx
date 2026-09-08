@@ -29,7 +29,7 @@ export function Footer() {
           <div>
             <p className={monoUi}>Tradesboard</p>
             <p className={`${mono.meta} mt-4 text-surface/60`}>
-              Alberta · Canada
+              Canada
             </p>
             <form className="mt-6 flex max-w-[320px] border border-surface">
               <label className="contents">

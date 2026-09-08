@@ -54,14 +54,12 @@ export function Close({ className, size = 16 }: IconProps) {
   );
 }
 
-export function Bookmark({
-  className,
-  size = 16,
-  filled = false,
-}: IconProps & { filled?: boolean }) {
+export function Share({ className, size = 16 }: IconProps) {
   return (
-    <svg {...base(size)} className={className} fill={filled ? 'currentColor' : 'none'}>
-      <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
+    <svg {...base(size)} className={className}>
+      <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+      <path d="M16 6l-4-4-4 4" />
+      <path d="M12 2v13" />
     </svg>
   );
 }

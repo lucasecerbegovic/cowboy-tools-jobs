@@ -55,3 +55,17 @@ export function ButtonLink({
 }: ButtonLinkProps) {
   return <Link {...props} className={`${buttonClass(variant, size)} ${className}`} />;
 }
+
+type ButtonAnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  variant?: Variant;
+  size?: Size;
+};
+
+export function ButtonAnchor({
+  variant = 'fill',
+  size = 'default',
+  className = '',
+  ...props
+}: ButtonAnchorProps) {
+  return <a {...props} className={`${buttonClass(variant, size)} ${className}`} />;
+}

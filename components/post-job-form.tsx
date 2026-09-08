@@ -31,8 +31,8 @@ export function PostJobForm() {
       <div className="mx-auto flex max-w-[480px] flex-col items-center border border-ink px-8 py-12 text-center">
         <p className={monoUi}>Posting submitted</p>
         <p className={`mt-4 text-body ${muted}`}>
-          “{v.title}” at {v.employer} is queued for review. We email{' '}
-          {v.contactEmail} once it is live.
+          “{v.title}” at {v.employer} is live on the board. Applications go to{' '}
+          {v.contactEmail}.
         </p>
         <ButtonLink href="/jobs" className="mt-8">
           Back to jobs

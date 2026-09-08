@@ -1,0 +1,110 @@
+// SQLite for local/dev. To use Postgres/Supabase later:
+// 1. Set DATABASE_URL to the Postgres connection string
+// 2. Change provider below from "sqlite" to "postgresql"
+// 3. Run `npx prisma migrate dev`
+// Models stay the same — no rewrite.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum JobSource {
+  employer
+  job_bank
+  adzuna
+}
+
+model Employer {
+  slug      String   @id
+  name      String
+  verified  Boolean  @default(false)
+  city      String
+  province  String
+  country   String   @default("CA")
+  founded   Int?
+  size      String?
+  about     String   @default("")
+  website   String?
+  logoUrl   String?  @map("logo_url")
+  jobs      Job[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("employers")
+}
+
+model Job {
+  id               String        @id @default(cuid())
+  source           JobSource
+  sourceId         String        @map("source_id")
+  title            String
+  company          String
+  description      String
+  trade            String
+  nocOrSoc         String?       @map("noc_or_soc")
+  country          String
+  region           String?
+  city             String?
+  lat              Float?
+  lng              Float?
+  isApprenticeship Boolean       @default(false) @map("is_apprenticeship")
+  employmentType   String?       @map("employment_type")
+  salaryMin        Float?        @map("salary_min")
+  salaryMax        Float?        @map("salary_max")
+  salaryCurrency   String?       @map("salary_currency")
+  payUnit          String?       @map("pay_unit")
+  applyUrl         String?       @map("apply_url")
+  applyEmail       String?       @map("apply_email")
+  postedAt         DateTime      @map("posted_at")
+  expiresAt        DateTime?     @map("expires_at")
+  union            Boolean       @default(false)
+  experience       String        @default("")
+  responsibilities Json?
+  raw              Json?
+  employerSlug     String        @map("employer_slug")
+  employer         Employer      @relation(fields: [employerSlug], references: [slug], onDelete: Cascade)
+  applications     Application[]
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@unique([source, sourceId])
+  @@index([trade])
+  @@index([country])
+  @@index([city])
+  @@index([isApprenticeship])
+  @@index([postedAt])
+  @@index([employerSlug])
+  @@map("jobs")
+}
+
+model Application {
+  id        String   @id @default(cuid())
+  jobId     String   @map("job_id")
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  phone     String?
+  ticket    String?
+  message   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([jobId])
+  @@map("applications")
+}
+
+model IngestRun {
+  id         String    @id @default(cuid())
+  source     String
+  startedAt  DateTime  @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  counts     Json?
+  error      String?
+
+  @@index([source, startedAt])
+  @@map("ingest_runs")
+}

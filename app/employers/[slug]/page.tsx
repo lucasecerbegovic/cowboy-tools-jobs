@@ -5,27 +5,33 @@ import { ButtonLink } from '@/components/button';
 import { ChevronLeft } from '@/components/icons';
 import { ListingRow } from '@/components/listing-row';
 import { EmptyState } from '@/components/empty-state';
+import { EmployerLogo } from '@/components/ui/employer-logo';
 import { mono, monoUi, muted } from '@/lib/brand-type';
-import {
-  EMPLOYERS,
-  employerTrades,
-  getEmployer,
-  jobsForEmployer,
-} from '@/lib/employers';
 import { TRADE_LABELS } from '@/lib/jobs';
+import { getEmployer, jobsForEmployer } from '@/lib/store';
 
-export function generateStaticParams() {
-  return EMPLOYERS.map((e) => ({ slug: e.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const e = getEmployer((await params).slug);
-  if (!e) return { title: 'Employer not found — Tradesboard' };
-  return { title: `${e.name} — Tradesboard`, description: e.about };
+  const e = await getEmployer((await params).slug);
+  if (!e) return { title: 'Employer not found' };
+  return {
+    title: e.name,
+    description: e.about,
+    openGraph: {
+      title: e.name,
+      description: e.about,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: e.name,
+      description: e.about,
+    },
+  };
 }
 
 export default async function EmployerProfile({
@@ -33,16 +39,16 @@ export default async function EmployerProfile({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const employer = getEmployer((await params).slug);
+  const employer = await getEmployer((await params).slug);
   if (!employer) notFound();
 
-  const jobs = jobsForEmployer(employer.slug);
-  const trades = employerTrades(employer.slug);
+  const jobs = await jobsForEmployer(employer.slug);
+  const trades = employer.trades;
 
   const facts: [string, string][] = [
     ['Location', `${employer.city}, ${employer.province}`],
-    ['Founded', String(employer.founded)],
-    ['Size', employer.size],
+    ['Founded', employer.founded ? String(employer.founded) : 'Not listed'],
+    ['Size', employer.size ?? 'Not listed'],
     ['Open roles', String(jobs.length)],
   ];
 
@@ -54,12 +60,7 @@ export default async function EmployerProfile({
       </ButtonLink>
 
       <div className="mt-6 flex items-start gap-5">
-        <div
-          aria-hidden
-          className={`${mono.label} flex h-20 w-20 shrink-0 items-center justify-center border border-ink`}
-        >
-          {employer.name.slice(0, 2).toUpperCase()}
-        </div>
+        <EmployerLogo name={employer.name} src={employer.logoUrl} size="lg" />
         <div className="min-w-0">
           <h1 className="text-job">{employer.name}</h1>
           <p className={`${mono.employer} mt-2 ${muted}`}>

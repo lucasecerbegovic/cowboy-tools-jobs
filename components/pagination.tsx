@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from '@/components/icons';
-import { mono } from '@/lib/brand-type';
+import { mono, muted } from '@/lib/brand-type';
+import { paginationItems } from '@/lib/pagination';
 import { href, toParams, type Query } from '@/lib/url';
 
 function pageHref(query: Query, page: number) {
@@ -23,10 +24,10 @@ export function Pagination({
   totalPages: number;
 }) {
   if (totalPages <= 1) return null;
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const items = paginationItems(page, totalPages);
 
   return (
-    <nav aria-label="Pagination" className={`${mono.badge} flex`}>
+    <nav aria-label="Pagination" className={`${mono.badge} flex flex-wrap`}>
       {page > 1 ? (
         <Link
           href={pageHref(query, page - 1)}
@@ -43,19 +44,29 @@ export function Pagination({
         </span>
       )}
 
-      {pages.map((p) => (
-        <Link
-          key={p}
-          href={pageHref(query, p)}
-          aria-label={`Page ${p}`}
-          aria-current={p === page ? 'page' : undefined}
-          className={`${cell} -mr-px ${
-            p === page ? 'bg-ink text-surface' : 'hover:bg-row-hover'
-          }`}
-        >
-          {p}
-        </Link>
-      ))}
+      {items.map((item, i) =>
+        item === 'ellipsis' ? (
+          <span
+            key={`ellipsis-${i}`}
+            aria-hidden
+            className={`${cell} -mr-px ${muted}`}
+          >
+            …
+          </span>
+        ) : (
+          <Link
+            key={item}
+            href={pageHref(query, item)}
+            aria-label={`Page ${item}`}
+            aria-current={item === page ? 'page' : undefined}
+            className={`${cell} -mr-px ${
+              item === page ? 'bg-ink text-surface' : 'hover:bg-row-hover'
+            }`}
+          >
+            {item}
+          </Link>
+        ),
+      )}
 
       {page < totalPages ? (
         <Link

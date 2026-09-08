@@ -1,18 +1,21 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ApplyForm } from '@/components/apply-form';
-import { ButtonLink } from '@/components/button';
+import { ButtonAnchor, ButtonLink } from '@/components/button';
 import { ChevronLeft } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
-import { formatPay, getJob } from '@/lib/jobs';
+import { applyTarget, formatPay } from '@/lib/jobs';
+import { getJob } from '@/lib/store';
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const job = getJob((await params).id);
-  return { title: job ? `Apply — ${job.title} — Tradesboard` : 'Not found' };
+  const job = await getJob((await params).id);
+  return { title: job ? `Apply — ${job.title}` : 'Not found' };
 }
 
 export default async function ApplyPage({
@@ -20,8 +23,10 @@ export default async function ApplyPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const job = getJob((await params).id);
+  const job = await getJob((await params).id);
   if (!job) notFound();
+
+  const apply = applyTarget(job);
 
   return (
     <main className="mx-auto max-w-[720px] px-4 py-12 md:px-8">
@@ -37,7 +42,25 @@ export default async function ApplyPage({
       </p>
 
       <div className="mt-12">
-        <ApplyForm jobId={job.id} jobTitle={job.title} />
+        {apply.external ? (
+          <div className="border border-ink px-8 py-12 text-center">
+            <p className={monoUi}>Apply on the original listing</p>
+            <p className={`mt-4 text-body ${muted}`}>
+              This role is aggregated from an external board. Applications go
+              through the source listing, not Tradesboard.
+            </p>
+            <ButtonAnchor
+              href={apply.href}
+              className="mt-8"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Continue to listing
+            </ButtonAnchor>
+          </div>
+        ) : (
+          <ApplyForm jobId={job.id} jobTitle={job.title} />
+        )}
       </div>
     </main>
   );
