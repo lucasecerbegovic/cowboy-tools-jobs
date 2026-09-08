@@ -94,10 +94,22 @@ Used for **state only** — never as decoration, never as a brand fill. All four
 |-------|--------|----------|-----|
 | Urgent | `#B42318` | 6.6:1 | closing soon, expired, form errors |
 | Caution | `#B54708` | 5.4:1 | incomplete profile, unverified employer |
-| Success | `#067647` | 5.7:1 | offer received, verified employer, saved confirmation |
+| Success | `#067647` | 5.7:1 | offer received, verified employer, copy confirmation |
 | Neutral | `#000` | 21:1 | new, active, applied — the default |
 
-Employment-type badges (`FULL-TIME`, `CONTRACT`, `APPRENTICESHIP`, `UNION`) are **outlined black, not colored**. There are too many for color to stay legible, and they are categories, not states.
+### Category badges
+
+Employment type, union, and verified badges are **filled**: tinted background, matching text, matching border. Trade badges stay outlined ink. Each pair below is ≥ 4.5:1 (11px mono on its fill).
+
+| Badge | Text / border | Fill |
+|-------|----------------|------|
+| Full-time | `#163A5F` | `#D5E6F5` |
+| Part-time | `#6B2D5B` | `#F3D9EC` |
+| Contract | `#8C3A16` | `#F6DCCE` |
+| Apprenticeship | `#7A4A00` | `#F3E0B5` |
+| Union | `#1B4F72` | `#D0E6F5` |
+| Verified employer | `#fff` | `#067647` (Success) — solid green fill |
+| Closing soon | Urgent | `#F8DDD9` |
 
 ---
 
@@ -126,7 +138,7 @@ Below `1024px` everything is single-column and the filter rail becomes a full-sc
 - Standard easing: `cubic-bezier(0.22, 1, 0.36, 1)`.
 - Primary CTA: **exception** — `transition-colors duration-150`, `hover:bg-black hover:text-white`.
 - Filter drawer: `220ms` slide.
-- Save toggle: `140ms` — must feel instant, it is a high-frequency action.
+- Share copy: `140ms` invert plus a 2s “link copied” tooltip — confirmation, not a toggle.
 - Respect `prefers-reduced-motion` globally in `globals.css`.
 - Define once in `globals.css`, never redefine locally: `animate-skeleton` (1.4s, listing-row loading state).
 
@@ -145,7 +157,7 @@ This is a utility product. Motion confirms actions; it does not entertain.
 - Radius `0`. Uppercase.
 - Variants: black fill + white text; white fill + `1px solid #000` + black text; bare text + underline on hover.
 - Default hover: opacity `0.7`. Large primary CTA: invert (named exception).
-- Compact is for in-row actions only (`SAVE`, `SHARE`) and must still occupy a `44px` tap target via padding.
+- Compact is for in-row actions only (`SHARE`) and must still occupy a `44px` tap target via padding.
 
 ---
 
@@ -196,18 +208,18 @@ Field text and help text compile to their own tokens — `text-field` (15px) and
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [logo 48]  Journeyman Electrician                 [ SAVE ]   │
+│ [logo 48]  Journeyman Electrician                [ SHARE ]   │
 │            ACME ELECTRIC · CALGARY, AB                       │
 │            $38–46/HR    FULL-TIME  UNION        2 DAYS AGO   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-- Padding `20px 24px`. Min-height `96px`. Logo `48×48`, `1px solid #000`.
+- Padding `20px 24px`. Min-height `96px`. Logo `48×48`, `1px solid #000`. When no logo is on file, render two-letter initials in the same box.
 - Title Geist 17px/500. Employer mono 13px `0.14em` uppercase. Separator ` · `.
 - Pay mono 14px/500 — always leftmost in the metadata row, always present. If an employer omits pay, render `PAY NOT LISTED` at `0.6` rather than hiding the slot; the column must stay aligned.
-- Badges outlined, `11px` mono, `4px 8px` padding, `1px solid #000`.
+- Badges `11px` mono, `4px 8px` padding. Employment type, union, and verified use filled category colors (see [Category badges](#category-badges)); trade and source stay outlined ink.
 - Posted date right-aligned, mono 12px at `0.6`.
-- Hover: background `rgba(0,0,0,0.03)`. Save toggle: outlined → ink fill.
+- Hover: background `rgba(0,0,0,0.03)`. Share: outlined → ink fill while confirming.
 - Rows sit at `0px` gap so borders collapse to shared 1px rules.
 
 ### Filter rail
@@ -215,7 +227,7 @@ Field text and help text compile to their own tokens — `text-field` (15px) and
 - Group label: mono 11px `0.18em` uppercase, full ink, `1px solid #000` bottom rule, `12px` padding below.
 - Option row: `44px` tall, checkbox `20×20`, label Geist 14px, count mono 12px at `0.6` right-aligned.
 - Group gap `28px`.
-- Active filters render as chips above results: ink fill, white mono 11px, `×` at 1.4px stroke.
+- Active filters render as chips above results: employment-type and union chips use the same filled category colors as listing badges; search, location, and trade stay ink fill, white mono 11px, `×` at 1.4px stroke.
 - `CLEAR ALL` as a bare text button, mono 11px, right-aligned in the chip row.
 
 ### Job detail
@@ -223,18 +235,18 @@ Field text and help text compile to their own tokens — `text-field` (15px) and
 - Title Geist 32px/600. Employer mono 13px `0.14em` below.
 - Spec table: `grid 180px 1fr`, row padding `16px 0`, `1px solid rgba(0,0,0,0.12)` between rows. Labels mono 11px `0.18em`; values Geist 15px. Rows: Pay · Type · Trade · Experience · Location · Posted · Closes.
 - Body copy Geist 16px, line-height `1.6`, max-width `68ch`.
-- Apply card: sticky, `1px solid #000`, padding `24px`, large CTA full-width, save + share as compact buttons beneath.
+- Apply card: sticky, `1px solid #000`, padding `24px`, large CTA full-width, compact Share beneath (copies the job URL).
 
 ### Company card — directory surface
 
 - `1px solid #000`, padding `24px`, `0px` grid gap so cards share borders.
-- Logo `56×56`. Name Geist 17px/500. Trade categories as outlined badges.
+- Logo `56×56`. Missing logos use two-letter initials. Name Geist 17px/500. Trade categories as outlined badges.
 - Footer strip: mono 12px at `0.6` — `12 OPEN ROLES · CALGARY, AB`.
-- Verified employers carry a Success badge; unverified carry nothing (never a Caution badge — absence is not a warning). `verified` is a property of the employer record, never copied onto a listing, so the two can never disagree.
+- Verified employers carry a Success badge (solid green fill, white text); unverified carry nothing (never a Caution badge — absence is not a warning). `verified` is a property of the employer record, never copied onto a listing, so the two can never disagree.
 
 ### Empty states
 
-Every search-driven surface needs one. Structure is identical across all four:
+Every search-driven surface needs one. Structure is identical across all three:
 
 - `1px solid #000` box, padding `48px 32px`, centered, max-width `480px`.
 - Mono 11px `0.18em` uppercase label → Geist 15px explanation at `0.6` → one default button.
@@ -242,7 +254,6 @@ Every search-driven surface needs one. Structure is identical across all four:
 | Surface | Label | Action |
 |---------|-------|--------|
 | Zero results | `NO MATCHES` | `CLEAR FILTERS` |
-| No saved jobs | `NOTHING SAVED YET` | `BROWSE JOBS` |
 | No applications | `NO APPLICATIONS` | `BROWSE JOBS` |
 | Employer, no posts | `NO ACTIVE POSTINGS` | `POST A JOB` |
 
@@ -250,9 +261,19 @@ Zero-results must also surface the nearest broader query — drop the narrowest 
 
 ### Pagination
 
-- Cells `40×40`, `1px solid #000`, `0px` gap so borders collapse.
+- Cells `40×40`, `1px solid #000`, `0px` gap so borders collapse. Wrap rather than overflow.
 - Mono 12px `0.14em`. Current page: ink fill, white text.
 - Prev/next chevrons 1.4px stroke. Disabled state: `opacity: 0.35` — permitted here because chevrons are not text.
+- Never list every page. Show first, last, the current page ±1, and ellipsis for skipped ranges. Ellipsis is a non-interactive cell (muted, not a link). Cap at 7 numbered buttons.
+
+### Open Graph card — 1200×630
+
+Shared when a URL is posted. Same system as the product: white field, 40px inset, 1px ink frame. No shadow, no radius, no photography.
+
+- Header: `TRADESBOARD` mono tracked; `CANADA` on the right of the site card.
+- Site headline is the homepage display line (`WORK IN THE TRADES`). Job titles stay mixed case; employer names are mono uppercase.
+- Pay is always present on job cards (including `PAY NOT LISTED`). Employment-type and union badges use category fills; trade stays outlined ink.
+- Generated by `app/opengraph-image.tsx` / `app/jobs/[id]/opengraph-image.tsx` / `app/employers/[slug]/opengraph-image.tsx`. Set `NEXT_PUBLIC_SITE_URL` in production so `og:image` is absolute.
 
 ### Footer
 
@@ -268,7 +289,8 @@ These break a rule above **on purpose**. Do not "fix" them, and do not extend th
 |-----------|----------------|
 | Primary CTA inverts on hover | It is the single most important action on the page |
 | Pagination chevrons at `opacity: 0.35` | Icons, not text — the 4.5:1 floor governs text |
-| Row hover at `rgba(0,0,0,0.03)` | The one background fill in the system; needed for row targeting |
+| Row hover at `rgba(0,0,0,0.03)` | Needed for row targeting; not a decorative fill |
+| Category badge fills | Employment type, union, and verified must be scannable at a glance |
 | Spec-table rules at `rgba(0,0,0,0.12)` | Full-ink 1px rules are too heavy inside a dense table |
 | `PAY NOT LISTED` placeholder | Column alignment outranks hiding an empty value |
 
@@ -279,7 +301,6 @@ These break a rule above **on purpose**. Do not "fix" them, and do not extend th
 - Shadowed or rounded cards. If it needs separation, it needs a border.
 - A dark theme. Branded surfaces hardcode `#000` / `#fff`.
 - A third font family, or any display face beyond Geist.
-- Colored employment-type badges.
 - A viewport-height photo hero.
 - Carousels. This is a search product; results are ranked lists.
 
@@ -294,7 +315,7 @@ Measure from these before inventing. **None exist yet** — check each off as it
 - [x] `lib/brand-type.ts` — `mono` role map, `monoUi`, `muted`
 - [x] `components/header.tsx`
 - [x] `components/search-field.tsx` — GET form; a search is a shareable URL
-- [x] `components/listing-row.tsx` — stretched link + separate save button
+- [x] `components/listing-row.tsx` — stretched link + separate share button
 - [x] `components/filter-rail.tsx` — URL-driven facets, counts exclude own dimension
 - [x] `components/badge.tsx`
 - [x] `components/company-card.tsx`
@@ -307,7 +328,9 @@ Measure from these before inventing. **None exist yet** — check each off as it
 - [x] `components/footer.tsx`
 - [x] `components/button.tsx` — `fill` / `outline` / `bare`, three sizes
 - [x] `components/icons.tsx` — 1.4px stroke, no fill
-- [x] `components/save-button.tsx` — the only client component in the slice
+- [x] `components/share-button.tsx` — copies the job URL; “link copied” tooltip
+- [x] `app/opengraph-image.tsx` — 1200×630 site card; job/employer variants in their route folders
+- [x] `lib/og/` — ImageResponse frame, copy, vendored Geist latin (WOFF)
 
 ---
 
