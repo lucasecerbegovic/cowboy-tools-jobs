@@ -4,6 +4,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import {
   getMetadataBase,
+  OG_SITE_NAME,
   SITE_DESCRIPTION,
   SITE_NAME,
 } from '@/lib/site';
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_CA',
-    siteName: SITE_NAME,
+    siteName: OG_SITE_NAME,
   },
   twitter: {
     card: 'summary_large_image',

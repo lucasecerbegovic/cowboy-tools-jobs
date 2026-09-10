@@ -1,21 +1,12 @@
-import { OG_SIZE, siteOgCopy } from '@/lib/og/copy';
-import { SiteOgCard } from '@/lib/og/frame';
-import { renderOgImage } from '@/lib/og/render';
-import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
+import { OG_ALT, OG_SIZE } from '@/lib/og/copy';
+import { renderSiteOgImage } from '@/lib/og/render';
 
 export const runtime = 'nodejs';
-export const alt = `${SITE_NAME} — ${SITE_DESCRIPTION}`;
+export const alt = OG_ALT;
 export const size = OG_SIZE;
 export const contentType = 'image/png';
+export const revalidate = 86400;
 
 export default async function Image() {
-  const copy = siteOgCopy();
-  return renderOgImage(
-    <SiteOgCard
-      locale={copy.locale}
-      headline={copy.headline}
-      description={copy.description}
-      trades={copy.trades}
-    />,
-  );
+  return renderSiteOgImage();
 }

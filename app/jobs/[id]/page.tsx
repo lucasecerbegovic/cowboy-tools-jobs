@@ -13,6 +13,7 @@ import {
   formatPay,
   formatPosted,
 } from '@/lib/jobs';
+import { OG_SITE_NAME } from '@/lib/site';
 import { getEmployer, getJob } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: job.summary,
+      siteName: OG_SITE_NAME,
     },
     twitter: {
       card: 'summary_large_image',

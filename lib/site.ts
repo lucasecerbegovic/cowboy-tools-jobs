@@ -3,6 +3,8 @@
  * metadataBase must be absolute so crawlers accept og:image.
  */
 export const SITE_NAME = 'Cowboy Tools Jobs';
+/** og:site_name and logo alt — matches cowboytools.ca. In-app chrome stays SITE_NAME. */
+export const OG_SITE_NAME = 'Cowboy Tools';
 export const SITE_DESCRIPTION = 'Jobs and employers in the skilled trades in Canada.';
 export const SITE_TAGLINE = 'Work in the trades';
 

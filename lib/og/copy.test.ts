@@ -1,8 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { employerOgCopy, jobOgCopy, siteOgCopy } from '@/lib/og/copy';
+import { jobOgCopy, OG_ALT, siteOgCopy } from '@/lib/og/copy';
 import type { Job } from '@/lib/jobs';
-import { getMetadataBase, normalizeSiteUrl, SITE_NAME } from '@/lib/site';
+import {
+  getMetadataBase,
+  normalizeSiteUrl,
+  OG_SITE_NAME,
+  SITE_NAME,
+} from '@/lib/site';
 
 const sample: Job = {
   id: 'je-4401',
@@ -25,26 +30,47 @@ const sample: Job = {
   responsibilities: ['Install'],
 };
 
-test('site OG copy is the homepage headline and trade strip', () => {
+test('site OG copy is the jobs manifesto, not the HTML meta description', () => {
   const copy = siteOgCopy();
-  assert.equal(copy.brand, SITE_NAME);
-  assert.equal(copy.headline, 'Work in the trades');
-  assert.equal(copy.locale, 'Canada');
-  assert.match(copy.trades, /Electrical/);
-  assert.doesNotMatch(copy.trades, /Other trades/);
+  assert.equal(copy.eyebrow, 'Jobs');
+  assert.equal(copy.headline, 'Work in the trades.');
+  assert.equal(copy.subhead, 'Jobs across Canada.');
+  assert.deepEqual(copy.cells, [
+    'Skilled Trades',
+    'Open Roles',
+    'Canada',
+    'Apply Direct',
+  ]);
+  assert.equal(OG_ALT, 'Work in the trades. Jobs across Canada.');
 });
 
-test('job OG copy keeps pay in the leftmost scanned slot', () => {
+test('OG site name is Cowboy Tools; in-app name stays Cowboy Tools Jobs', () => {
+  assert.equal(OG_SITE_NAME, 'Cowboy Tools');
+  assert.equal(SITE_NAME, 'Cowboy Tools Jobs');
+});
+
+test('job OG copy keeps pay in the body and always fills four cells', () => {
   const copy = jobOgCopy(sample);
   assert.equal(copy.headline, 'Journeyman Electrician');
   assert.equal(copy.employer, 'Northline Electric · Calgary, AB');
   assert.equal(copy.pay, '$38–$46/hr');
-  assert.deepEqual(
-    copy.badges.map((b) => b.label),
-    ['Full-time', 'Union', 'Electrical'],
-  );
-  assert.equal(copy.badges[0]?.tone, 'full-time');
-  assert.equal(copy.badges[2]?.tone, 'electrical');
+  assert.deepEqual(copy.cells, [
+    'Full-time',
+    'Electrical',
+    'Calgary, AB',
+    'Union',
+  ]);
+  assert.equal(copy.cells.length, 4);
+});
+
+test('job OG copy uses Open role when the listing is not union', () => {
+  const copy = jobOgCopy({ ...sample, union: false });
+  assert.deepEqual(copy.cells, [
+    'Full-time',
+    'Electrical',
+    'Calgary, AB',
+    'Open role',
+  ]);
 });
 
 test('job OG copy omits placeholder employers from the byline', () => {
@@ -59,31 +85,6 @@ test('job OG copy omits placeholder employers from the byline', () => {
 test('job OG copy still renders PAY NOT LISTED when pay is omitted', () => {
   const copy = jobOgCopy({ ...sample, payMin: undefined, payMax: undefined });
   assert.equal(copy.pay, 'Pay not listed');
-});
-
-test('employer OG copy pluralizes open roles and marks verified', () => {
-  const one = employerOgCopy({
-    name: 'Northline Electric',
-    city: 'Calgary',
-    province: 'AB',
-    openRoles: 1,
-    verified: true,
-    trades: ['electrical'],
-  });
-  assert.equal(one.roles, '1 open role');
-  assert.equal(one.verified, true);
-  assert.equal(one.trades[0]?.label, 'Electrical');
-  assert.equal(one.trades[0]?.tone, 'electrical');
-
-  const many = employerOgCopy({
-    name: 'Northline Electric',
-    city: 'Calgary',
-    province: 'AB',
-    openRoles: 12,
-    verified: false,
-    trades: ['electrical', 'hvac'],
-  });
-  assert.equal(many.roles, '12 open roles');
 });
 
 test('normalizeSiteUrl adds https except for localhost', () => {
