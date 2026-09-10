@@ -4,6 +4,7 @@ import { ApplyForm } from '@/components/apply-form';
 import { ButtonAnchor, ButtonLink } from '@/components/button';
 import { ChevronLeft } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
+import { JobByline } from '@/components/job-byline';
 import { applyTarget, formatPay } from '@/lib/jobs';
 import { getJob } from '@/lib/store';
 import { SITE_NAME } from '@/lib/site';
@@ -39,7 +40,12 @@ export default async function ApplyPage({
       <p className={`${monoUi} ${muted} mt-6`}>Application</p>
       <h1 className="mt-3 text-page-title">{job.title}</h1>
       <p className={`${mono.employer} mt-2 ${muted}`}>
-        {job.employer} · {job.city}, {job.province} · {formatPay(job)}
+        <JobByline
+          employer={job.employer}
+          city={job.city}
+          province={job.province}
+          extra={formatPay(job)}
+        />
       </p>
 
       <div className="mt-12">

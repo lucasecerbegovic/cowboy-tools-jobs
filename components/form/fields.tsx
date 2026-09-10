@@ -5,9 +5,10 @@ import { ChevronDown, Check } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
 import { validateField, type Rule } from '@/lib/validate';
 
-/* Field chrome. 48px, 1px ink, radius 0, hard inset focus — no glow. */
-const CONTROL =
-  'w-full bg-surface px-4 text-field outline-none placeholder:text-muted ' +
+/* Field chrome. 48px, 1px ink, radius 0, hard inset focus — no glow.
+   16px on small viewports so iOS Safari does not zoom on focus. */
+export const fieldControlClass =
+  'w-full bg-surface px-4 text-[16px] md:text-field outline-none placeholder:text-muted ' +
   'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink';
 
 function borderFor(error?: string) {
@@ -123,7 +124,7 @@ export function TextField({
         placeholder={placeholder}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-err` : help ? `${id}-help` : undefined}
-        className={`${CONTROL} h-[var(--field-h)] ${borderFor(error)}`}
+        className={`${fieldControlClass} h-[var(--field-h)] ${borderFor(error)}`}
         {...handlers}
       />
       <Messages helpId={`${id}-help`} errorId={`${id}-err`} help={help} error={error} />
@@ -156,7 +157,7 @@ export function TextArea({
         placeholder={placeholder}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-err` : help ? `${id}-help` : undefined}
-        className={`${CONTROL} min-h-[120px] resize-y py-3 ${borderFor(error)}`}
+        className={`${fieldControlClass} min-h-[120px] resize-y py-3 ${borderFor(error)}`}
         {...handlers}
       />
       <Messages helpId={`${id}-help`} errorId={`${id}-err`} help={help} error={error} />
@@ -189,7 +190,7 @@ export function SelectField({
           defaultValue={defaultValue ?? ''}
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-err` : help ? `${id}-help` : undefined}
-          className={`${CONTROL} h-[var(--field-h)] appearance-none pr-11 ${borderFor(error)}`}
+          className={`${fieldControlClass} h-[var(--field-h)] appearance-none pr-11 ${borderFor(error)}`}
           {...handlers}
         >
           <option value="" disabled>

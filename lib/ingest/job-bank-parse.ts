@@ -10,6 +10,7 @@ import {
   tradeFromNoc,
   tradeFromText,
 } from '@/lib/trades';
+import { isGenericEmployerName } from '@/lib/employer-logo';
 import type { NormalizedJob } from '@/lib/ingest/types';
 
 type CsvRow = Record<string, string>;
@@ -120,7 +121,11 @@ export function parseJobBankCsv(
     const employmentTerm = cell(row, 'Employment Term');
     const experience = cell(row, 'Experience Level');
     const salaryPer = cell(row, 'Salary Per');
-    const company = cell(row, 'Placement Agency') || 'Employer (via Job Bank)';
+    const agency = cell(row, 'Placement Agency');
+    const company =
+      agency && !isGenericEmployerName(agency)
+        ? agency
+        : 'Employer (via Job Bank)';
     const postedAt = parseDate(cell(row, 'First Posting Date')) ?? new Date();
     const mappedTrade = tradeFromNoc(noc);
     const trade =

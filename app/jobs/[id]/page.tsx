@@ -1,10 +1,11 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/badge';
-import { ButtonAnchor, ButtonLink } from '@/components/button';
-import { ShareButton } from '@/components/share-button';
+import { ApplyCard } from '@/components/apply-card';
+import { ButtonLink } from '@/components/button';
+import { JobByline } from '@/components/job-byline';
 import { ChevronLeft } from '@/components/icons';
 import { mono, monoUi, muted } from '@/lib/brand-type';
+import { isGenericEmployerName, jobDocumentTitle } from '@/lib/employer-logo';
 import {
   TRADE_LABELS,
   TYPE_LABELS,
@@ -23,16 +24,17 @@ export async function generateMetadata({
 }) {
   const job = await getJob((await params).id);
   if (!job) return { title: 'Job not found' };
+  const title = jobDocumentTitle(job);
   return {
-    title: `${job.title} — ${job.employer}`,
+    title,
     description: job.summary,
     openGraph: {
-      title: `${job.title} — ${job.employer}`,
+      title,
       description: job.summary,
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${job.title} — ${job.employer}`,
+      title,
       description: job.summary,
     },
   };
@@ -64,7 +66,7 @@ export default async function JobDetail({
   ];
 
   return (
-    <main className="mx-auto max-w-[var(--content-max)] px-4 py-10 md:px-8">
+    <main className="mx-auto max-w-[var(--content-max)] px-4 py-10 max-lg:pb-[calc(var(--apply-bar-h)+env(safe-area-inset-bottom))] md:px-8">
       <ButtonLink href="/jobs" variant="bare" size="sm" className="-ml-3">
         <ChevronLeft size={14} />
         All jobs
@@ -74,21 +76,21 @@ export default async function JobDetail({
         <article>
           <h1 className="text-job">{job.title}</h1>
           <p className={`${mono.employer} mt-2 ${muted}`}>
-            <Link
-              href={`/employers/${job.employerSlug}`}
-              className="underline-offset-4 hover:underline"
-            >
-              {job.employer}
-            </Link>{' '}
-            · {job.city}, {job.province}
+            <JobByline
+              employer={job.employer}
+              city={job.city}
+              province={job.province}
+            />
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Badge tone={job.type}>{TYPE_LABELS[job.type]}</Badge>
+            {job.source === 'job_bank' && <Badge>Job Bank</Badge>}
             {job.source === 'adzuna' && <Badge>Jobs by Adzuna</Badge>}
             {job.union && <Badge tone="union">Union</Badge>}
-            {/* Absence of verification is not a warning — unverified gets nothing. */}
-            {employer?.verified && <Badge tone="success">Verified employer</Badge>}
+            {!isGenericEmployerName(job.employer) && employer?.verified && (
+              <Badge tone="success">Verified employer</Badge>
+            )}
           </div>
 
           <dl className="mt-10">
@@ -135,35 +137,8 @@ export default async function JobDetail({
           </div>
         </article>
 
-        <aside className="lg:sticky lg:top-[var(--sticky-top)] lg:self-start">
-          <div className="border border-ink p-6">
-            <p className={`${mono.pay} ${hasPay ? 'text-ink' : muted}`}>
-              {formatPay(job)}
-            </p>
-            <p className={`${mono.meta} mt-1 ${muted}`}>
-              {formatPosted(job.postedDaysAgo)}
-            </p>
-
-            {apply.external ? (
-              <ButtonAnchor
-                href={apply.href}
-                size="lg"
-                className="mt-6 w-full"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Apply on listing
-              </ButtonAnchor>
-            ) : (
-              <ButtonLink href={apply.href} size="lg" className="mt-6 w-full">
-                Apply now
-              </ButtonLink>
-            )}
-
-            <div className="mt-4">
-              <ShareButton title={job.title} href={`/jobs/${job.id}`} />
-            </div>
-          </div>
+        <aside className="lg:self-start">
+          <ApplyCard job={job} apply={apply} />
         </aside>
       </div>
     </main>

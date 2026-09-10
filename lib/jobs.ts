@@ -1,6 +1,9 @@
 import type { TradeSlug } from '@/lib/trades';
 import { isTradeSlug } from '@/lib/trades';
-import { resolveEmployerLogo } from '@/lib/employer-logo';
+import {
+  displayEmployerName,
+  resolveEmployerLogo,
+} from '@/lib/employer-logo';
 import { formatJobTitle } from '@/lib/format-title';
 import { locationMatches } from '@/lib/ingest/regions';
 
@@ -203,7 +206,7 @@ export function mapJobRecord(row: JobRecord): Job {
     id: row.id,
     source: isJobSource(row.source) ? row.source : 'employer',
     title: formatJobTitle(row.title),
-    employer: row.company,
+    employer: displayEmployerName(row.company),
     employerSlug: row.employerSlug,
     city: row.city || row.region || '—',
     province: row.region || row.country,
@@ -221,7 +224,7 @@ export function mapJobRecord(row: JobRecord): Job {
     responsibilities: asStringList(row.responsibilities),
     applyUrl: row.applyUrl ?? undefined,
     employerLogo: resolveEmployerLogo({
-      name: row.company,
+      name: displayEmployerName(row.company),
       slug: row.employerSlug,
       logoUrl: row.logoUrl,
       website: row.website,

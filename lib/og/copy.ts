@@ -1,3 +1,4 @@
+import { displayEmployerName, jobByline } from '@/lib/employer-logo';
 import type { Employer } from '@/lib/employers';
 import {
   TRADE_LABELS,
@@ -5,6 +6,7 @@ import {
   formatPay,
   type EmploymentType,
   type Job,
+  type Trade,
 } from '@/lib/jobs';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from '@/lib/site';
 
@@ -13,6 +15,7 @@ export const OG_SIZE = { width: 1200, height: 630 } as const;
 export type OgBadgeTone =
   | 'default'
   | EmploymentType
+  | Trade
   | 'union'
   | 'success';
 
@@ -66,12 +69,12 @@ export function jobOgCopy(job: Job): JobOgCopy {
     { label: TYPE_LABELS[job.type], tone: job.type },
   ];
   if (job.union) badges.push({ label: 'Union', tone: 'union' });
-  badges.push({ label: TRADE_LABELS[job.trade], tone: 'default' });
+  badges.push({ label: TRADE_LABELS[job.trade], tone: job.trade });
 
   return {
     brand: SITE_NAME,
     headline: job.title,
-    employer: `${job.employer} · ${job.city}, ${job.province}`,
+    employer: jobByline(job),
     pay: formatPay(job),
     badges,
   };
@@ -85,7 +88,7 @@ export function employerOgCopy(
 ): EmployerOgCopy {
   return {
     brand: SITE_NAME,
-    headline: employer.name,
+    headline: displayEmployerName(employer.name),
     location: `${employer.city}, ${employer.province}`,
     roles:
       employer.openRoles === 1
@@ -94,7 +97,7 @@ export function employerOgCopy(
     verified: employer.verified,
     trades: employer.trades.map((t) => ({
       label: TRADE_LABELS[t],
-      tone: 'default' as const,
+      tone: t,
     })),
   };
 }

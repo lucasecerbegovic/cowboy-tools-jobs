@@ -27,6 +27,7 @@ describe('parseJobBankCsv', () => {
     assert.equal(byId['JB-FIX-003'].trade, 'millwright');
     assert.equal(byId['JB-FIX-004'].trade, 'heavy_equipment');
     assert.ok(byId['JB-FIX-001'].applyUrl?.includes('jobbank.gc.ca'));
+    assert.equal(byId['JB-FIX-001'].company, 'Employer (via Job Bank)');
   });
 
   it('keeps Western Canada trades rows when regions is west', () => {

@@ -19,7 +19,7 @@ export default async function Home() {
   return (
     <main className="mx-auto max-w-[var(--content-max)] px-4 md:px-8">
       {/* Search is the hero — capped so listings clear the fold on a 667px phone. */}
-      <section className="max-h-[320px] py-10 md:py-12">
+      <section className="py-10 md:py-12">
         <p className={`${monoUi} ${muted}`}>Canada · {openCount} open roles</p>
         <h1 className="mt-3 text-display uppercase">Work in the trades</h1>
         <div className="mt-7">
@@ -46,7 +46,7 @@ export default async function Home() {
             </div>
             {hasMore && (
               <div className="mt-10 flex justify-center">
-                <ButtonLink href="/jobs" size="lg">
+                <ButtonLink href="/jobs" size="lg" className="max-sm:w-full">
                   Search hundreds more jobs
                 </ButtonLink>
               </div>

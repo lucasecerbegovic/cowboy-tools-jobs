@@ -1,7 +1,9 @@
+import { isGenericEmployerName } from '@/lib/employer-logo';
 import { prisma } from '@/lib/prisma';
 import {
   toEmployer,
   toEmployerCard,
+  sortEmployersByOpenRoles,
   type Employer,
   type EmployerCard,
 } from '@/lib/employers';
@@ -81,7 +83,11 @@ export async function listEmployers(): Promise<EmployerCard[]> {
     if (list) list.push(j);
     else bySlug.set(j.employerSlug, [j]);
   }
-  return employers.map((e) => toEmployerCard(e, bySlug.get(e.slug) ?? []));
+  return sortEmployersByOpenRoles(
+    employers
+      .filter((e) => !isGenericEmployerName(e.name))
+      .map((e) => toEmployerCard(e, bySlug.get(e.slug) ?? [])),
+  );
 }
 
 export async function getEmployer(slug: string): Promise<Employer | undefined> {

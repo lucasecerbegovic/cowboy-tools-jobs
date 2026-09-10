@@ -101,6 +101,34 @@ test('mapJobRecord hydrates posted age and pay unit', () => {
   assert.equal(job.employerLogo, undefined);
 });
 
+test('mapJobRecord replaces junk company names', () => {
+  const job = mapJobRecord({
+    id: 'x',
+    source: 'adzuna',
+    title: 'Electrician',
+    company: 'No',
+    description: 'Service.',
+    trade: 'electrician',
+    country: 'CA',
+    region: 'AB',
+    city: 'Calgary',
+    isApprenticeship: false,
+    employmentType: 'Full-time',
+    salaryMin: null,
+    salaryMax: null,
+    payUnit: null,
+    applyUrl: null,
+    postedAt: new Date(),
+    expiresAt: null,
+    union: false,
+    experience: '',
+    responsibilities: [],
+    employerSlug: 'adzuna-1',
+  });
+  assert.equal(job.employer, 'Employer not listed');
+  assert.equal(job.trade, 'electrical');
+});
+
 test('mapJobRecord title-cases sloppy lowercase titles', () => {
   const job = mapJobRecord({
     id: 'x',

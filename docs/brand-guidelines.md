@@ -99,7 +99,7 @@ Used for **state only** — never as decoration, never as a brand fill. All four
 
 ### Category badges
 
-Employment type, union, and verified badges are **filled**: tinted background, matching text, matching border. Trade badges stay outlined ink. Each pair below is ≥ 4.5:1 (11px mono on its fill).
+Employment type, trade, union, and verified badges are **filled**: tinted background, matching text, matching border. Each pair below is ≥ 4.5:1 (11px mono on its fill).
 
 | Badge | Text / border | Fill |
 |-------|----------------|------|
@@ -108,6 +108,14 @@ Employment type, union, and verified badges are **filled**: tinted background, m
 | Contract | `#8C3A16` | `#F6DCCE` |
 | Apprenticeship | `#7A4A00` | `#F3E0B5` |
 | Union | `#1B4F72` | `#D0E6F5` |
+| Electrical | `#5C4500` | `#F3E6A4` |
+| Plumbing | `#0A4F6B` | `#CDECF4` |
+| HVAC & Refrigeration | `#0A5544` | `#CDEDE4` |
+| Carpentry | `#5C3212` | `#EED6BC` |
+| Welding | `#7A1A08` | `#F5CFC4` |
+| Heavy Equipment | `#3A4A10` | `#E0E8BC` |
+| Millwright | `#2A3848` | `#D4DCE6` |
+| Other trades | `#3A3A3A` | `#E4E4E4` |
 | Verified employer | `#fff` | `#067647` (Success) — solid green fill |
 | Closing soon | Urgent | `#F8DDD9` |
 
@@ -208,16 +216,23 @@ Field text and help text compile to their own tokens — `text-field` (15px) and
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [logo 48]  Journeyman Electrician                [ SHARE ]   │
+│ [mark 48]  Journeyman Electrician                [ SHARE ]   │
 │            ACME ELECTRIC · CALGARY, AB                       │
 │            $38–46/HR    FULL-TIME  UNION        2 DAYS AGO   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-- Padding `20px 24px`. Min-height `96px`. Logo `48×48`, `1px solid #000`. When no logo is on file, render two-letter initials in the same box.
-- Title Geist 17px/500. Employer mono 13px `0.14em` uppercase. Separator ` · `.
+Unlisted Job Bank rows drop the company and keep location:
+
+```
+│ [mark 48]  Construction Electrician              [ SHARE ]   │
+│            CALGARY, AB                                       │
+```
+
+- Padding `20px 24px`. Min-height `96px`. Logo `48×48`, `1px solid #000`. When no logo is on file, render a 1.4px trade mark in the same box (bolt, wrench, hammer, flame, gear, snowflake, excavator, or hard hat) — never letter initials. The employer directory is parked (`/employers` redirects to `/jobs`). Named companies render as plain text on the byline; placeholder names (`No`, `Yes`, aggregator labels) are omitted so the second line is location only.
+- Title Geist 17px/500. Byline mono 13px `0.14em` uppercase. Separator ` · ` between company and location when both are present.
 - Pay mono 14px/500 — always leftmost in the metadata row, always present. If an employer omits pay, render `PAY NOT LISTED` at `0.6` rather than hiding the slot; the column must stay aligned.
-- Badges `11px` mono, `4px 8px` padding. Employment type, union, and verified use filled category colors (see [Category badges](#category-badges)); trade and source stay outlined ink.
+- Badges `11px` mono, `4px 8px` padding. Employment type, union, and verified use filled category colors (see [Category badges](#category-badges)); source stays outlined ink. Trade badges use those same fills on employer cards and directory/job filter chips.
 - Posted date right-aligned, mono 12px at `0.6`.
 - Hover: background `rgba(0,0,0,0.03)`. Share: outlined → ink fill while confirming.
 - Rows sit at `0px` gap so borders collapse to shared 1px rules.
@@ -227,20 +242,22 @@ Field text and help text compile to their own tokens — `text-field` (15px) and
 - Group label: mono 11px `0.18em` uppercase, full ink, `1px solid #000` bottom rule, `12px` padding below.
 - Option row: `44px` tall, checkbox `20×20`, label Geist 14px, count mono 12px at `0.6` right-aligned.
 - Group gap `28px`.
-- Active filters render as chips above results: employment-type and union chips use the same filled category colors as listing badges; search, location, and trade stay ink fill, white mono 11px, `×` at 1.4px stroke.
+- Active filters render as chips above results: employment-type, trade, and union chips use the same filled category colors as listing badges; search and location stay ink fill, white mono 11px, `×` at 1.4px stroke.
 - `CLEAR ALL` as a bare text button, mono 11px, right-aligned in the chip row.
 
 ### Job detail
 
-- Title Geist 32px/600. Employer mono 13px `0.14em` below.
+- Title Geist 32px/600. Byline mono 13px `0.14em` below — location always; company name only when it is a real shop.
 - Spec table: `grid 180px 1fr`, row padding `16px 0`, `1px solid rgba(0,0,0,0.12)` between rows. Labels mono 11px `0.18em`; values Geist 15px. Rows: Pay · Type · Trade · Experience · Location · Posted · Closes.
 - Body copy Geist 16px, line-height `1.6`, max-width `68ch`.
 - Apply card: sticky, `1px solid #000`, padding `24px`, large CTA full-width, compact Share beneath (copies the job URL).
 
-### Company card — directory surface
+### Company card — directory surface (parked)
+
+`/employers` redirects to `/jobs`. The card spec stays so the directory can come back without a redesign.
 
 - `1px solid #000`, padding `24px`, `0px` grid gap so cards share borders.
-- Logo `56×56`. Missing logos use two-letter initials. Name Geist 17px/500. Trade categories as outlined badges.
+- Logo `56×56`. Missing logos use the employer's primary trade mark, not initials. Name Geist 17px/500. Trade categories as filled badges (see [Category badges](#category-badges)). Directory filter chips above the grid use the same fills; the selected chip inverts to that trade’s ink color with white text. Unlisted / placeholder employers (`No`, `N/A`, aggregator labels) are omitted from the directory.
 - Footer strip: mono 12px at `0.6` — `12 OPEN ROLES · CALGARY, AB`.
 - Verified employers carry a Success badge (solid green fill, white text); unverified carry nothing (never a Caution badge — absence is not a warning). `verified` is a property of the employer record, never copied onto a listing, so the two can never disagree.
 
@@ -271,13 +288,13 @@ Zero-results must also surface the nearest broader query — drop the narrowest 
 Shared when a URL is posted. Same system as the product: white field, 40px inset, 1px ink frame. No shadow, no radius, no photography.
 
 - Header: `COWBOY TOOLS JOBS` mono tracked; `CANADA` on the right of the site card.
-- Site headline is the homepage display line (`WORK IN THE TRADES`). Job titles stay mixed case; employer names are mono uppercase.
-- Pay is always present on job cards (including `PAY NOT LISTED`). Employment-type and union badges use category fills; trade stays outlined ink.
+- Site headline is the homepage display line (`WORK IN THE TRADES`). Job titles stay mixed case. The byline is location; a company name appears only when it is a real shop (mono uppercase).
+- Pay is always present on job cards (including `PAY NOT LISTED`). Employment-type, trade, and union badges use category fills.
 - Generated by `app/opengraph-image.tsx` / `app/jobs/[id]/opengraph-image.tsx` / `app/employers/[slug]/opengraph-image.tsx`. Set `NEXT_PUBLIC_SITE_URL` in production so `og:image` is absolute.
 
 ### Footer
 
-Black. Four columns: brand + locality, For Tradespeople, For Employers, Company. Labels mono 11px `0.18em` at `0.6`. Links Geist 14px, hover opacity `0.7`. Job-alert signup: `1px solid #fff` field, white **SUBSCRIBE** button.
+Black. Four columns: brand + locality, For Tradespeople, For Employers, Company. The employer directory is parked, so footer links go to jobs / post / home — not `/employers`. Labels mono 11px `0.18em` at `0.6`. Links Geist 14px, hover opacity `0.7`. Job-alert signup: `1px solid #fff` field, white **SUBSCRIBE** button.
 
 ---
 
@@ -290,7 +307,7 @@ These break a rule above **on purpose**. Do not "fix" them, and do not extend th
 | Primary CTA inverts on hover | It is the single most important action on the page |
 | Pagination chevrons at `opacity: 0.35` | Icons, not text — the 4.5:1 floor governs text |
 | Row hover at `rgba(0,0,0,0.03)` | Needed for row targeting; not a decorative fill |
-| Category badge fills | Employment type, union, and verified must be scannable at a glance |
+| Category badge fills | Employment type, trade, union, and verified must be scannable at a glance |
 | Spec-table rules at `rgba(0,0,0,0.12)` | Full-ink 1px rules are too heavy inside a dense table |
 | `PAY NOT LISTED` placeholder | Column alignment outranks hiding an empty value |
 

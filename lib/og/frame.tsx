@@ -17,6 +17,18 @@ const BADGE_PAINT: Record<
   apprenticeship: { color: '#7A4A00', background: '#F3E0B5', border: '#7A4A00' },
   union: { color: '#1B4F72', background: '#D0E6F5', border: '#1B4F72' },
   success: { color: SURFACE, background: '#067647', border: '#067647' },
+  electrical: { color: '#5C4500', background: '#F3E6A4', border: '#5C4500' },
+  plumbing: { color: '#0A4F6B', background: '#CDECF4', border: '#0A4F6B' },
+  hvac: { color: '#0A5544', background: '#CDEDE4', border: '#0A5544' },
+  carpentry: { color: '#5C3212', background: '#EED6BC', border: '#5C3212' },
+  welding: { color: '#7A1A08', background: '#F5CFC4', border: '#7A1A08' },
+  'heavy-equipment': {
+    color: '#3A4A10',
+    background: '#E0E8BC',
+    border: '#3A4A10',
+  },
+  millwright: { color: '#2A3848', background: '#D4DCE6', border: '#2A3848' },
+  other: { color: '#3A3A3A', background: '#E4E4E4', border: '#3A3A3A' },
 };
 
 function Hairline() {

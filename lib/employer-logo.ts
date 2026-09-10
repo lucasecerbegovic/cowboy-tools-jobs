@@ -1,11 +1,78 @@
+/** Shown when a listing has no real employer. Matches the "Pay not listed" pattern. */
+export const UNLISTED_EMPLOYER_NAME = 'Employer not listed';
+
 /** First two letters of the name, ignoring punctuation. "A.B. Mechanical" → "AB". */
 export function employerInitials(name: string): string {
   const letters = name.replace(/[^A-Za-z0-9]+/g, '').slice(0, 2).toUpperCase();
   return letters || '—';
 }
 
+const PLACEHOLDER_EMPLOYER_NAMES = new Set([
+  'no',
+  'yes',
+  'none',
+  'n/a',
+  'na',
+  'n.a',
+  'n.a.',
+  'unknown',
+  'unknown employer',
+  'not specified',
+  'not listed',
+  'not available',
+  'confidential',
+  'confidential employer',
+  'undisclosed',
+  'tbd',
+  'null',
+  '-',
+  '--',
+  '—',
+  UNLISTED_EMPLOYER_NAME.toLowerCase(),
+]);
+
+/**
+ * Aggregator labels, empty strings, and junk values like "No" / "N/A".
+ * These must not become a shared employer slug — they are not a company.
+ */
 export function isGenericEmployerName(name: string): boolean {
-  return /via job bank|via adzuna/i.test(name);
+  const trimmed = name.trim();
+  if (!trimmed) return true;
+  if (/via job bank|via adzuna/i.test(trimmed)) return true;
+  const folded = trimmed.toLowerCase().replace(/\.+$/, '');
+  if (PLACEHOLDER_EMPLOYER_NAMES.has(folded)) return true;
+  if (/^(yes|no(ne)?|n\/a)(\s+(company|employer|name))?$/i.test(trimmed)) {
+    return true;
+  }
+  return false;
+}
+
+export function displayEmployerName(name: string): string {
+  return isGenericEmployerName(name) ? UNLISTED_EMPLOYER_NAME : name;
+}
+
+export function jobLocationLine(city: string, province: string): string {
+  return `${city}, ${province}`;
+}
+
+/** Location always. Company name only when it is a real shop — never a placeholder. */
+export function jobByline(input: {
+  employer: string;
+  city: string;
+  province: string;
+}): string {
+  const location = jobLocationLine(input.city, input.province);
+  if (isGenericEmployerName(input.employer)) return location;
+  return `${input.employer} · ${location}`;
+}
+
+export function jobDocumentTitle(input: {
+  title: string;
+  employer: string;
+  city: string;
+  province: string;
+}): string {
+  return `${input.title} — ${jobByline(input)}`;
 }
 
 const PUBLIC_MAIL_HOSTS = new Set([
@@ -159,9 +226,9 @@ export function inferEmployerBranding(input: {
 }
 
 /**
- * URL to render in the logo box, or undefined to keep initials.
+ * URL to render in the logo box, or undefined to keep the trade mark.
  * Without a Logo.dev key, .gc.ca sites use their official favicon — we do
- * not guess logos for unknown contractors (wrong marks are worse than initials).
+ * not guess logos for unknown contractors (wrong marks are worse than a trade icon).
  */
 export function resolveEmployerLogo(
   input: {

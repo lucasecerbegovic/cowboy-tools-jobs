@@ -11,14 +11,15 @@ cp .env.example .env
 pnpm install
 npx prisma migrate dev --name init
 pnpm db:seed
+pnpm ingest
 pnpm dev
 ```
 
 The app listens on **http://localhost:8081**.
 
-Seed data includes Canadian listings (native employer posts and Job Bank samples). Adzuna live ingest skips unless API keys are set.
+`pnpm db:seed` does not insert demo listings — it removes leftover invented shops from earlier seeds. Load Canadian jobs with `pnpm ingest` (Job Bank fixture CSV; Adzuna skips unless API keys are set).
 
-Listing rows and employer cards show a logo when we have one: a mark on file, an Adzuna company image, or a .gc.ca favicon. Everything else keeps two-letter initials. Set `NEXT_PUBLIC_LOGO_DEV_PUBLISHABLE_KEY` to resolve logos for other real companies by domain or name.
+Listing rows show a logo when we have one: a mark on file, an Adzuna company image, or a .gc.ca favicon. Missing logos use a trade icon. The employer directory is parked (`/employers` redirects to `/jobs`). Set `NEXT_PUBLIC_LOGO_DEV_PUBLISHABLE_KEY` to resolve logos for other real companies by domain or name.
 
 ## Ingest (legal sources only)
 

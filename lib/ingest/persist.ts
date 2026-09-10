@@ -4,6 +4,7 @@ import { slugify } from '@/lib/slug';
 import { formatJobTitle } from '@/lib/format-title';
 import type { IngestCounts, NormalizedJob } from '@/lib/ingest/types';
 import {
+  displayEmployerName,
   inferEmployerBranding,
   isGenericEmployerName,
 } from '@/lib/employer-logo';
@@ -69,11 +70,12 @@ export async function ensureEmployer(
   },
   db: DbClient = prisma,
 ): Promise<string> {
+  const name = displayEmployerName(input.name);
   const slug = employerSlugFor(input.name, input.source, input.sourceId);
   const city = input.city || '—';
   const province = input.region || input.country;
   const branding = inferEmployerBranding({
-    name: input.name,
+    name,
     logoUrl: input.logoUrl,
     website: input.website,
     applyUrl: input.applyUrl,
@@ -83,7 +85,7 @@ export async function ensureEmployer(
   await db.employer.upsert({
     where: { slug },
     update: {
-      name: input.name,
+      name,
       city,
       province,
       country: input.country,
@@ -92,12 +94,12 @@ export async function ensureEmployer(
     },
     create: {
       slug,
-      name: input.name,
+      name,
       verified: input.verified ?? input.source === 'employer',
       city,
       province,
       country: input.country,
-      about: aboutForSource(input.source, input.name),
+      about: aboutForSource(input.source, name),
       website: branding.website,
       logoUrl: branding.logoUrl,
     },
@@ -107,6 +109,7 @@ export async function ensureEmployer(
 }
 
 async function persistOneJob(db: DbClient, job: NormalizedJob): Promise<void> {
+  const company = displayEmployerName(job.company);
   const employerSlug = await ensureEmployer(
     {
       name: job.company,
@@ -132,7 +135,7 @@ async function persistOneJob(db: DbClient, job: NormalizedJob): Promise<void> {
     },
     update: {
       title: job.title,
-      company: job.company,
+      company,
       description: job.description,
       trade: job.trade,
       nocOrSoc: job.nocOrSoc ?? null,
@@ -158,7 +161,7 @@ async function persistOneJob(db: DbClient, job: NormalizedJob): Promise<void> {
       source: job.source,
       sourceId: job.sourceId,
       title: job.title,
-      company: job.company,
+      company,
       description: job.description,
       trade: job.trade,
       nocOrSoc: job.nocOrSoc ?? null,

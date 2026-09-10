@@ -1,39 +1,21 @@
-import { OG_SIZE, employerOgCopy, fallbackOgCopy } from '@/lib/og/copy';
-import { EmployerOgCard, SiteOgCard } from '@/lib/og/frame';
+import { OG_SIZE, siteOgCopy } from '@/lib/og/copy';
+import { SiteOgCard } from '@/lib/og/frame';
 import { renderOgImage } from '@/lib/og/render';
-import { getEmployer } from '@/lib/store';
 import { SITE_NAME } from '@/lib/site';
 
 export const runtime = 'nodejs';
-export const alt = `Employer on ${SITE_NAME}`;
+export const alt = `${SITE_NAME} — skilled trades jobs`;
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 
-export default async function Image({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const employer = await getEmployer((await params).slug);
-  if (!employer) {
-    const copy = fallbackOgCopy('Employer not found');
-    return renderOgImage(
-      <SiteOgCard
-        locale={copy.locale}
-        headline={copy.headline}
-        description={copy.description}
-        trades={copy.trades}
-      />,
-    );
-  }
-
-  const copy = employerOgCopy(employer);
+/** Directory is parked; old employer URLs share the site card. */
+export default async function Image() {
+  const copy = siteOgCopy();
   return renderOgImage(
-    <EmployerOgCard
+    <SiteOgCard
+      locale={copy.locale}
       headline={copy.headline}
-      location={copy.location}
-      roles={copy.roles}
-      verified={copy.verified}
+      description={copy.description}
       trades={copy.trades}
     />,
   );

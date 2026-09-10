@@ -1,5 +1,8 @@
 import { TRADE_LABELS, type Job, type Trade } from '@/lib/jobs';
-import { resolveEmployerLogo } from '@/lib/employer-logo';
+import {
+  displayEmployerName,
+  resolveEmployerLogo,
+} from '@/lib/employer-logo';
 
 export type Employer = {
   slug: string;
@@ -37,11 +40,27 @@ function tradesFromJobs(jobs: { trade: Trade }[]): Trade[] {
   return (Object.keys(TRADE_LABELS) as Trade[]).filter((t) => seen.has(t));
 }
 
+function employerMark(
+  row: Pick<EmployerRecord, 'name' | 'slug' | 'logoUrl' | 'website'>,
+): { name: string; logoUrl?: string } {
+  const name = displayEmployerName(row.name);
+  return {
+    name,
+    logoUrl: resolveEmployerLogo({
+      name,
+      slug: row.slug,
+      logoUrl: row.logoUrl,
+      website: row.website,
+    }),
+  };
+}
+
 export function toEmployer(row: EmployerRecord, jobs: Job[]): Employer {
   const mine = jobs.filter((j) => j.employerSlug === row.slug);
+  const mark = employerMark(row);
   return {
     slug: row.slug,
-    name: row.name,
+    name: mark.name,
     verified: row.verified,
     city: row.city,
     province: row.province,
@@ -52,12 +71,7 @@ export function toEmployer(row: EmployerRecord, jobs: Job[]): Employer {
     trades: tradesFromJobs(mine),
     openRoles: mine.length,
     website: row.website ?? undefined,
-    logoUrl: resolveEmployerLogo({
-      name: row.name,
-      slug: row.slug,
-      logoUrl: row.logoUrl,
-      website: row.website,
-    }),
+    logoUrl: mark.logoUrl,
   };
 }
 
@@ -80,20 +94,16 @@ export function toEmployerCard(
   jobs: EmployerJobTally[],
 ): EmployerCard {
   const mine = jobs.filter((j) => j.employerSlug === row.slug);
+  const mark = employerMark(row);
   return {
     slug: row.slug,
-    name: row.name,
+    name: mark.name,
     verified: row.verified,
     city: row.city,
     province: row.province,
     trades: tradesFromJobs(mine),
     openRoles: mine.length,
-    logoUrl: resolveEmployerLogo({
-      name: row.name,
-      slug: row.slug,
-      logoUrl: row.logoUrl,
-      website: row.website,
-    }),
+    logoUrl: mark.logoUrl,
   };
 }
 
@@ -112,4 +122,12 @@ export function filterEmployers<
     }
     return true;
   });
+}
+
+export function sortEmployersByOpenRoles<
+  T extends Pick<Employer, 'name' | 'openRoles'>,
+>(employers: T[]): T[] {
+  return [...employers].sort(
+    (a, b) => b.openRoles - a.openRoles || a.name.localeCompare(b.name),
+  );
 }

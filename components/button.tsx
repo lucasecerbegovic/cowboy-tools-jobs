@@ -12,17 +12,16 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 const SIZES: Record<Size, string> = {
-  default: `${mono.button} h-[var(--button-h)] px-[18px]`,
-  lg: `${mono.buttonLg} h-[var(--button-h-lg)] px-6`,
-  // Compact keeps a 44px tap target via vertical margin on touch.
-  sm: `${mono.badge} h-[var(--button-h-sm)] px-3`,
+  default: `${mono.button} h-[var(--button-h)] min-h-[var(--tap-min)] px-[18px]`,
+  lg: `${mono.buttonLg} h-[var(--button-h-lg)] min-h-[var(--tap-min)] px-6`,
+  sm: `${mono.badge} min-h-[var(--tap-min)] px-3`,
 };
 
 export function buttonClass(variant: Variant = 'fill', size: Size = 'default') {
   return [
     'inline-flex items-center justify-center gap-2 rounded-none',
     'transition-opacity duration-150 disabled:opacity-35',
-    'disabled:pointer-events-none whitespace-nowrap',
+    'disabled:pointer-events-none whitespace-nowrap max-sm:whitespace-normal',
     SIZES[size],
     VARIANTS[variant],
   ].join(' ');

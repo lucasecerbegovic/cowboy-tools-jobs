@@ -44,6 +44,16 @@ test('job OG copy keeps pay in the leftmost scanned slot', () => {
     ['Full-time', 'Union', 'Electrical'],
   );
   assert.equal(copy.badges[0]?.tone, 'full-time');
+  assert.equal(copy.badges[2]?.tone, 'electrical');
+});
+
+test('job OG copy omits placeholder employers from the byline', () => {
+  const copy = jobOgCopy({
+    ...sample,
+    employer: 'Employer not listed',
+    source: 'job_bank',
+  });
+  assert.equal(copy.employer, 'Calgary, AB');
 });
 
 test('job OG copy still renders PAY NOT LISTED when pay is omitted', () => {
@@ -63,6 +73,7 @@ test('employer OG copy pluralizes open roles and marks verified', () => {
   assert.equal(one.roles, '1 open role');
   assert.equal(one.verified, true);
   assert.equal(one.trades[0]?.label, 'Electrical');
+  assert.equal(one.trades[0]?.tone, 'electrical');
 
   const many = employerOgCopy({
     name: 'Northline Electric',

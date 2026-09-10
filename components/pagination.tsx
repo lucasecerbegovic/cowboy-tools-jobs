@@ -11,8 +11,8 @@ function pageHref(base: string, query: Query, page: number) {
   return href(base, p);
 }
 
-const cell =
-  'flex h-10 min-w-10 items-center justify-center border border-ink px-2 transition-colors duration-150';
+export const paginationCellClass =
+  'flex h-10 min-h-[var(--tap-min)] min-w-10 min-w-[var(--tap-min)] items-center justify-center border border-ink px-2 transition-colors duration-150';
 
 export function Pagination({
   query,
@@ -35,13 +35,13 @@ export function Pagination({
           href={pageHref(base, query, page - 1)}
           rel="prev"
           aria-label="Previous page"
-          className={`${cell} -mr-px hover:bg-row-hover`}
+          className={`${paginationCellClass} -mr-px hover:bg-row-hover`}
         >
           <ChevronLeft size={15} />
         </Link>
       ) : (
         // Chevrons are icons, not text — 0.35 is a named exception here.
-        <span aria-hidden className={`${cell} -mr-px opacity-35`}>
+        <span aria-hidden className={`${paginationCellClass} -mr-px opacity-35`}>
           <ChevronLeft size={15} />
         </span>
       )}
@@ -51,7 +51,7 @@ export function Pagination({
           <span
             key={`ellipsis-${i}`}
             aria-hidden
-            className={`${cell} -mr-px ${muted}`}
+            className={`${paginationCellClass} -mr-px ${muted}`}
           >
             …
           </span>
@@ -61,7 +61,7 @@ export function Pagination({
             href={pageHref(base, query, item)}
             aria-label={`Page ${item}`}
             aria-current={item === page ? 'page' : undefined}
-            className={`${cell} -mr-px ${
+            className={`${paginationCellClass} -mr-px ${
               item === page ? 'bg-ink text-surface' : 'hover:bg-row-hover'
             }`}
           >
@@ -75,12 +75,12 @@ export function Pagination({
           href={pageHref(base, query, page + 1)}
           rel="next"
           aria-label="Next page"
-          className={`${cell} hover:bg-row-hover`}
+          className={`${paginationCellClass} hover:bg-row-hover`}
         >
           <ChevronRight size={15} />
         </Link>
       ) : (
-        <span aria-hidden className={`${cell} opacity-35`}>
+        <span aria-hidden className={`${paginationCellClass} opacity-35`}>
           <ChevronRight size={15} />
         </span>
       )}

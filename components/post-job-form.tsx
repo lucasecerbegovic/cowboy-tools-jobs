@@ -176,7 +176,7 @@ export function PostJobForm() {
         />
       </Fieldset>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? 'Submitting…' : 'Submit posting'}
         </Button>

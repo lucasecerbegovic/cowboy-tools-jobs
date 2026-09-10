@@ -7,24 +7,20 @@ const COLUMNS = [
     title: 'For tradespeople',
     links: [
       { label: 'Browse jobs', href: '/jobs' },
-      { label: 'Employers', href: '/employers' },
       { label: 'Apprenticeships', href: '/jobs?type=apprenticeship' },
       { label: 'Union roles', href: '/jobs?union=1' },
     ],
   },
   {
     title: 'For employers',
-    links: [
-      { label: 'Post a job', href: '/post' },
-      { label: 'Directory', href: '/employers' },
-    ],
+    links: [{ label: 'Post a job', href: '/post' }],
   },
-  { title: 'Company', links: [{ label: 'About', href: '/employers' }] },
+  { title: 'Company', links: [{ label: 'About', href: '/' }] },
 ];
 
 export function Footer() {
   return (
-    <footer className="mt-24 bg-ink text-surface">
+    <footer className="mt-24 bg-ink text-surface pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto max-w-[var(--content-max)] px-4 py-14 md:px-8">
         <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]">
           <div>
@@ -38,12 +34,12 @@ export function Footer() {
                 <input
                   type="email"
                   placeholder="Email for job alerts"
-                  className="h-10 w-full bg-transparent px-3 text-body-sm outline-none placeholder:text-surface/60"
+                  className="h-[var(--tap-min)] w-full bg-transparent px-3 text-[16px] outline-none placeholder:text-surface/60"
                 />
               </label>
               <button
                 type="submit"
-                className={`${mono.button} shrink-0 bg-surface px-4 text-ink transition-opacity duration-150 hover:opacity-70`}
+                className={`${mono.button} min-h-[var(--tap-min)] shrink-0 bg-surface px-4 text-ink transition-opacity duration-150 hover:opacity-70`}
               >
                 Subscribe
               </button>
@@ -58,7 +54,7 @@ export function Footer() {
                   <li key={l.href}>
                     <Link
                       href={l.href}
-                      className="text-body-sm transition-opacity duration-150 hover:opacity-70"
+                      className="flex min-h-[var(--tap-min)] items-center text-body-sm transition-opacity duration-150 hover:opacity-70"
                     >
                       {l.label}
                     </Link>

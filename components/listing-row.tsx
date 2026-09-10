@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Badge } from '@/components/badge';
+import { JobByline } from '@/components/job-byline';
 import { ShareButton } from '@/components/share-button';
 import { EmployerLogo } from '@/components/ui/employer-logo';
 import { mono, muted } from '@/lib/brand-type';
@@ -15,10 +16,11 @@ export function ListingRow({ job }: { job: Job }) {
   const closingSoon = job.closesInDays !== undefined && job.closesInDays <= 3;
 
   return (
-    <article className="group relative flex min-h-[var(--row-min-h)] items-start gap-4 border border-ink px-6 py-5 transition-colors duration-150 hover:bg-row-hover">
+    <article className="group relative flex min-h-[var(--row-min-h)] items-start gap-4 border border-ink px-4 py-5 md:px-6 transition-colors duration-150 hover:bg-row-hover">
       <EmployerLogo
         name={job.employer}
         src={job.employerLogo}
+        trade={job.trade}
         size="sm"
         className="max-sm:hidden"
       />
@@ -35,14 +37,11 @@ export function ListingRow({ job }: { job: Job }) {
         </h3>
 
         <p className={`${mono.employer} mt-1.5 ${muted}`}>
-          {/* Sits above the stretched link so it stays independently clickable. */}
-          <Link
-            href={`/employers/${job.employerSlug}`}
-            className="relative z-10 underline-offset-4 hover:underline"
-          >
-            {job.employer}
-          </Link>{' '}
-          · {job.city}, {job.province}
+          <JobByline
+            employer={job.employer}
+            city={job.city}
+            province={job.province}
+          />
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -50,6 +49,7 @@ export function ListingRow({ job }: { job: Job }) {
             {formatPay(job)}
           </span>
           <Badge tone={job.type}>{TYPE_LABELS[job.type]}</Badge>
+          {job.source === 'job_bank' && <Badge>Job Bank</Badge>}
           {job.source === 'adzuna' && <Badge>Jobs by Adzuna</Badge>}
           {job.union && <Badge tone="union">Union</Badge>}
           {closingSoon && <Badge tone="urgent">Closes in {job.closesInDays}d</Badge>}

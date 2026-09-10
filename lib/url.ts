@@ -45,3 +45,19 @@ export function asArray(v: string | string[] | undefined): string[] {
   if (v === undefined) return [];
   return Array.isArray(v) ? v : [v];
 }
+
+/** Mobile filter drawer. Facet links keep this so the drawer stays open. */
+export const FILTERS_PARAM = 'filters';
+
+export function withFilters(sp: Query, open: boolean): URLSearchParams {
+  const p = toParams(sp);
+  if (open) p.set(FILTERS_PARAM, '1');
+  else p.delete(FILTERS_PARAM);
+  return p;
+}
+
+export function withoutFilters(sp: Query): Query {
+  const next = { ...sp };
+  delete next[FILTERS_PARAM];
+  return next;
+}

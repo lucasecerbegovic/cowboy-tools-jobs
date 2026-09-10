@@ -1,10 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  displayEmployerName,
   employerInitials,
   inferEmployerBranding,
   isGenericEmployerName,
   isSafeLogoUrl,
+  jobByline,
+  jobDocumentTitle,
   resolveEmployerLogo,
   websiteFromApplyUrl,
   websiteFromEmail,
@@ -18,6 +21,43 @@ test('initials skip punctuation', () => {
 test('generic aggregator names are skipped', () => {
   assert.equal(isGenericEmployerName('Employer (via Job Bank)'), true);
   assert.equal(isGenericEmployerName('Northline Electric'), false);
+});
+
+test('junk placeholders like "No" are not treated as a company', () => {
+  assert.equal(isGenericEmployerName('No'), true);
+  assert.equal(isGenericEmployerName('Yes'), true);
+  assert.equal(isGenericEmployerName('none'), true);
+  assert.equal(isGenericEmployerName('N/A'), true);
+  assert.equal(isGenericEmployerName('Unknown'), true);
+  assert.equal(isGenericEmployerName('No company'), true);
+  assert.equal(isGenericEmployerName('Nova Electric'), false);
+  assert.equal(displayEmployerName('No'), 'Employer not listed');
+  assert.equal(displayEmployerName('Northline Electric'), 'Northline Electric');
+});
+
+test('job byline omits placeholder companies and keeps real names', () => {
+  assert.equal(jobByline({ employer: 'No', city: 'Calgary', province: 'AB' }), 'Calgary, AB');
+  assert.equal(
+    jobByline({ employer: 'Employer (via Job Bank)', city: 'Toronto', province: 'ON' }),
+    'Toronto, ON',
+  );
+  assert.equal(
+    jobByline({ employer: 'Employer not listed', city: 'Winnipeg', province: 'MB' }),
+    'Winnipeg, MB',
+  );
+  assert.equal(
+    jobByline({ employer: 'Northline Electric', city: 'Calgary', province: 'AB' }),
+    'Northline Electric · Calgary, AB',
+  );
+  assert.equal(
+    jobDocumentTitle({
+      title: 'Plumber',
+      employer: 'No',
+      city: 'Calgary',
+      province: 'AB',
+    }),
+    'Plumber — Calgary, AB',
+  );
 });
 
 test('email domains become websites except public mail and .example', () => {

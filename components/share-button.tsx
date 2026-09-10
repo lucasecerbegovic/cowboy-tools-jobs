@@ -47,7 +47,7 @@ export function ShareButton({ title, href }: { title: string; href: string }) {
       {copied && (
         <span
           role="status"
-          className={`${mono.badge} pointer-events-none absolute top-full right-0 z-20 mt-1 whitespace-nowrap border border-ink bg-ink px-3 py-1.5 text-surface`}
+          className={`${mono.badge} pointer-events-none absolute top-full right-0 z-20 mt-1 whitespace-nowrap border border-ink bg-ink px-3 py-1.5 text-surface max-sm:right-auto max-sm:left-0`}
         >
           Link copied
         </span>

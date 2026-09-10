@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BADGE_TONES, isBadgeTone } from '@/components/badge';
 import { EmptyState } from '@/components/empty-state';
+import { FilterDrawer } from '@/components/filter-drawer';
 import { FilterRail } from '@/components/filter-rail';
 import { ListingRow } from '@/components/listing-row';
 import { Pagination } from '@/components/pagination';
@@ -18,13 +19,20 @@ import {
 } from '@/lib/jobs';
 import { paginate } from '@/lib/pagination';
 import { listJobs } from '@/lib/store';
-import { asArray, href, removeParam, type Query } from '@/lib/url';
+import {
+  asArray,
+  href,
+  removeParam,
+  withFilters,
+  withoutFilters,
+  type Query,
+} from '@/lib/url';
 
 const PER_PAGE = 18;
 
 function chipTone(key: string, value: string | undefined): string {
   if (key === 'union') return BADGE_TONES.union;
-  if (key === 'type' && value && isBadgeTone(value)) return BADGE_TONES[value];
+  if (value && isBadgeTone(value)) return BADGE_TONES[value];
   return 'border-ink bg-ink text-surface';
 }
 
@@ -114,6 +122,17 @@ export default async function JobsPage({
     .filter((c) => c.count > 0)
     .sort((a, b) => b.count - a.count)[0];
 
+  const filtersOpen = sp.filters === '1';
+  const facetQuery = withoutFilters(sp);
+  const railProps = {
+    trades,
+    types,
+    unionCount,
+    selectedTrades: filters.trade,
+    selectedTypes: filters.type,
+    unionOnly: filters.union,
+  };
+
   return (
     <main className="mx-auto max-w-[var(--content-max)] px-4 py-10 md:px-8">
       <SearchField defaultQ={filters.q} defaultLoc={filters.loc} />
@@ -124,7 +143,7 @@ export default async function JobsPage({
             <Link
               key={`${c.key}-${c.value ?? ''}`}
               href={href('/jobs', removeParam(sp, c.key, c.value))}
-              className={`${mono.badge} inline-flex items-center gap-2 border py-1.5 pl-3 pr-2 transition-opacity duration-150 hover:opacity-70 ${chipTone(c.key, c.value)}`}
+              className={`${mono.badge} inline-flex min-h-[var(--tap-min)] items-center gap-2 border px-3 transition-opacity duration-150 hover:opacity-70 ${chipTone(c.key, c.value)}`}
             >
               {c.label}
               <Close size={13} />
@@ -133,7 +152,7 @@ export default async function JobsPage({
           ))}
           <Link
             href="/jobs"
-            className={`${mono.badge} ml-auto underline-offset-4 hover:underline`}
+            className={`${mono.badge} ml-auto inline-flex min-h-[var(--tap-min)] items-center underline-offset-4 hover:underline`}
           >
             Clear all
           </Link>
@@ -141,29 +160,29 @@ export default async function JobsPage({
       )}
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[var(--rail-w)_1fr]">
-        <aside className="lg:sticky lg:top-[var(--sticky-top)] lg:self-start">
+        <aside className="hidden lg:sticky lg:top-[var(--sticky-top)] lg:block lg:self-start">
           <h2 className="sr-only">Filters</h2>
-          <FilterRail
-            query={sp}
-            trades={trades}
-            types={types}
-            unionCount={unionCount}
-            selectedTrades={filters.trade}
-            selectedTypes={filters.type}
-            unionOnly={filters.union}
-          />
+          <FilterRail query={facetQuery} {...railProps} />
         </aside>
 
         <section>
-          <div className="flex items-baseline justify-between gap-4 border-b border-ink pb-3">
+          <div className="flex items-center justify-between gap-4 border-b border-ink pb-3">
             <h2 className={monoUi}>
               {results.length} {results.length === 1 ? 'job' : 'jobs'}
             </h2>
-            {totalPages > 1 && (
-              <p className={`${mono.meta} ${muted}`}>
-                Page {page} of {totalPages}
-              </p>
-            )}
+            <div className="flex shrink-0 items-center gap-3">
+              {totalPages > 1 && (
+                <p className={`${mono.meta} ${muted}`}>
+                  Page {page} of {totalPages}
+                </p>
+              )}
+              <Link
+                href={href('/jobs', withFilters(sp, true))}
+                className={`${mono.button} inline-flex min-h-[var(--tap-min)] items-center border border-ink px-3 lg:hidden`}
+              >
+                Filters
+              </Link>
+            </div>
           </div>
 
           {pageItems.length > 0 ? (
@@ -174,7 +193,11 @@ export default async function JobsPage({
                 ))}
               </div>
               <div className="mt-8">
-                <Pagination query={sp} page={page} totalPages={totalPages} />
+                <Pagination
+                  query={facetQuery}
+                  page={page}
+                  totalPages={totalPages}
+                />
               </div>
             </>
           ) : (
@@ -197,6 +220,14 @@ export default async function JobsPage({
           )}
         </section>
       </div>
+
+      <FilterDrawer
+        open={filtersOpen}
+        closeHref={href('/jobs', withFilters(sp, false))}
+        clearHref="/jobs"
+      >
+        <FilterRail query={sp} {...railProps} />
+      </FilterDrawer>
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { filterEmployers, toEmployerCard, type Employer } from '@/lib/employers';
+import { filterEmployers, sortEmployersByOpenRoles, toEmployerCard, type Employer } from '@/lib/employers';
 
 const EMPLOYERS: Employer[] = [
   {
@@ -93,4 +93,27 @@ test('directory cards tally trades without carrying about copy', () => {
   assert.equal(card.openRoles, 2);
   assert.deepEqual(card.trades, ['electrical']);
   assert.equal('about' in card, false);
+});
+
+test('directory cards rewrite junk employer names', () => {
+  const card = toEmployerCard(
+    {
+      slug: 'adzuna-1',
+      name: 'No',
+      verified: false,
+      city: 'Calgary',
+      province: 'AB',
+      logoUrl: null,
+      website: null,
+    },
+    [{ employerSlug: 'adzuna-1', trade: 'electrical' }],
+  );
+  assert.equal(card.name, 'Employer not listed');
+});
+
+test('directory sorts by open roles descending, then name', () => {
+  assert.deepEqual(
+    sortEmployersByOpenRoles(EMPLOYERS).map((e) => e.slug),
+    ['northline-electric', 'ridgeline-interiors', 'cascade-industrial-services'],
+  );
 });

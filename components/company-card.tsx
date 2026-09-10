@@ -13,7 +13,12 @@ export function CompanyCard({ employer }: { employer: EmployerCard }) {
   return (
     <article className="group relative flex flex-col border border-ink p-6 transition-colors duration-150 hover:bg-row-hover">
       <div className="flex items-start gap-4">
-        <EmployerLogo name={employer.name} src={employer.logoUrl} size="md" />
+        <EmployerLogo
+          name={employer.name}
+          src={employer.logoUrl}
+          trade={employer.trades[0] ?? 'other'}
+          size="md"
+        />
         <div className="min-w-0 flex-1">
           <h3 className="text-row-title">
             <Link
@@ -35,7 +40,9 @@ export function CompanyCard({ employer }: { employer: EmployerCard }) {
       {trades.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-2">
           {trades.map((t) => (
-            <Badge key={t}>{TRADE_LABELS[t]}</Badge>
+            <Badge key={t} tone={t}>
+              {TRADE_LABELS[t]}
+            </Badge>
           ))}
         </div>
       )}
