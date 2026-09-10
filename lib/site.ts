@@ -7,6 +7,11 @@ export const SITE_NAME = 'Cowboy Tools Jobs';
 export const OG_SITE_NAME = 'Cowboy Tools';
 export const SITE_DESCRIPTION = 'Jobs and employers in the skilled trades in Canada.';
 export const SITE_TAGLINE = 'Work in the trades';
+/** Square brand mark under /public — header, footer, and OG cards. */
+export const SITE_LOGO_PATH = '/cowboy-tools-logo-full.png';
+/** Parent retail site; linked from the footer CTA. */
+export const PARENT_SITE_URL = 'https://cowboytools.ca';
+export const PARENT_SITE_CTA = 'Need great deals on tools?';
 
 export function normalizeSiteUrl(value: string): URL {
   const trimmed = value.trim().replace(/\/+$/, '');

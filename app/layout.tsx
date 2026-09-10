@@ -33,6 +33,11 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
+  // Same assets as cowboytools.ca (storefront public/favicon.ico + icon-192.png).
+  icons: {
+    icon: [{ url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' }],
+    apple: [{ url: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+  },
   openGraph: {
     type: 'website',
     locale: 'en_CA',

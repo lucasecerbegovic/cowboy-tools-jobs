@@ -34,6 +34,25 @@ test('Header paints a mobile menu button', () => {
   assert.match(html, /aria-expanded="false"/);
 });
 
+test('Header and Footer show the Cowboy Tools logo mark', () => {
+  const header = renderToString(Header());
+  const footer = renderToString(Footer());
+  assert.match(header, /cowboy-tools-logo-full\.png/);
+  assert.match(footer, /cowboy-tools-logo-full\.png/);
+});
+
+test('Footer links to the parent retail site', () => {
+  const footer = renderToString(Footer());
+  assert.match(footer, /href="https:\/\/cowboytools\.ca"/);
+  assert.match(footer, /Need great deals on tools\?/);
+});
+
+test('Footer Company About links to /about', () => {
+  const footer = renderToString(Footer());
+  assert.match(footer, /href="\/about"/);
+  assert.match(footer, />About</);
+});
+
 test('nav does not surface the parked employer directory', () => {
   const header = renderToString(Header());
   const footer = renderToString(Footer());

@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { SiteBrandLink } from '@/components/ui/site-brand-link';
 import { mono, monoUi } from '@/lib/brand-type';
-import { SITE_NAME } from '@/lib/site';
+import { PARENT_SITE_CTA, PARENT_SITE_URL, SITE_NAME } from '@/lib/site';
 
 const COLUMNS = [
   {
@@ -15,7 +16,7 @@ const COLUMNS = [
     title: 'For employers',
     links: [{ label: 'Post a job', href: '/post' }],
   },
-  { title: 'Company', links: [{ label: 'About', href: '/' }] },
+  { title: 'Company', links: [{ label: 'About', href: '/about' }] },
 ];
 
 export function Footer() {
@@ -24,26 +25,15 @@ export function Footer() {
       <div className="mx-auto max-w-[var(--content-max)] px-4 py-14 md:px-8">
         <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]">
           <div>
-            <p className={monoUi}>{SITE_NAME}</p>
-            <p className={`${mono.meta} mt-4 text-surface/60`}>
-              Canada
-            </p>
-            <form className="mt-6 flex max-w-[320px] border border-surface">
-              <label className="contents">
-                <span className="sr-only">Email for job alerts</span>
-                <input
-                  type="email"
-                  placeholder="Email for job alerts"
-                  className="h-[var(--tap-min)] w-full bg-transparent px-3 text-[16px] outline-none placeholder:text-surface/60"
-                />
-              </label>
-              <button
-                type="submit"
-                className={`${mono.button} min-h-[var(--tap-min)] shrink-0 bg-surface px-4 text-ink transition-opacity duration-150 hover:opacity-70`}
-              >
-                Subscribe
-              </button>
-            </form>
+            <SiteBrandLink tone="ink" />
+            <p className={`${mono.meta} mt-4 text-surface/60`}>Canada</p>
+            <a
+              href={PARENT_SITE_URL}
+              rel="noopener noreferrer"
+              className="mt-3 flex min-h-[var(--tap-min)] items-center text-body-sm transition-opacity duration-150 hover:opacity-70"
+            >
+              {PARENT_SITE_CTA}
+            </a>
           </div>
 
           {COLUMNS.map((col) => (
