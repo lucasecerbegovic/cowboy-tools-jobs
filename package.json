@@ -10,19 +10,22 @@
     "test": "TSX_TSCONFIG_PATH=tsconfig.test.json node --import tsx --import ./scripts/register.mjs --test 'lib/**/*.test.ts' 'components/**/*.test.ts'",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:turso-migrate": "node --env-file=.env --env-file=.env.local --import tsx scripts/turso-migrate.ts",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "db:setup": "prisma migrate dev && prisma db seed",
-    "ingest": "node --env-file=.env --import tsx scripts/ingest.ts",
-    "ingest:job-bank": "node --env-file=.env --import tsx scripts/ingest.ts job_bank",
-    "ingest:job-bank:west": "node --env-file=.env --import tsx scripts/ingest.ts job_bank --live --west",
-    "ingest:adzuna": "node --env-file=.env --import tsx scripts/ingest.ts adzuna",
+    "ingest": "node --env-file=.env --env-file=.env.local --import tsx scripts/ingest.ts",
+    "ingest:job-bank": "node --env-file=.env --env-file=.env.local --import tsx scripts/ingest.ts job_bank",
+    "ingest:job-bank:west": "node --env-file=.env --env-file=.env.local --import tsx scripts/ingest.ts job_bank --live --west",
+    "ingest:adzuna": "node --env-file=.env --env-file=.env.local --import tsx scripts/ingest.ts adzuna",
     "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "@prisma/adapter-libsql": "^6.19.3",
     "@prisma/client": "^6.19.3",
     "csv-parse": "^7.0.2",
     "next": "^15.5.0",
@@ -40,6 +43,10 @@
     "typescript": "^5.7.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@prisma/client", "prisma", "@prisma/engines"]
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "prisma",
+      "@prisma/engines"
+    ]
   }
 }

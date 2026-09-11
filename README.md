@@ -56,4 +56,4 @@ We do **not** scrape Indeed, LinkedIn, Glassdoor, or jobbank.gc.ca.
 
 ## Database
 
-Prisma + SQLite locally (`DATABASE_URL=file:./dev.db`). Swap to Postgres later by changing the URL and `provider` to `postgresql`.
+Prisma + SQLite locally (`DATABASE_URL=file:./dev.db`). Production uses **Turso** (libSQL) via `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` — see `.env.example`. Apply migrations to Turso with `pnpm db:turso-migrate` (Prisma Migrate still runs against the local file).

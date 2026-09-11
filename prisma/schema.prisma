@@ -1,8 +1,8 @@
-// SQLite for local/dev. To use Postgres/Supabase later:
-// 1. Set DATABASE_URL to the Postgres connection string
-// 2. Change provider below from "sqlite" to "postgresql"
-// 3. Run `npx prisma migrate dev`
-// Models stay the same — no rewrite.
+// Local/dev: SQLite file via DATABASE_URL=file:./dev.db
+// Production: same provider; lib/prisma.ts uses Turso via @prisma/adapter-libsql
+// when TURSO_DATABASE_URL + TURSO_AUTH_TOKEN are set.
+// Apply schema to Turso with: pnpm db:turso-migrate
+// To move to Postgres/Supabase later: change provider to "postgresql" and migrate.
 
 generator client {
   provider = "prisma-client-js"
