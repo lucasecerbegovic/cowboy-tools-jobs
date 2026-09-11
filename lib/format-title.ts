@@ -94,7 +94,7 @@ function titleCase(title: string): string {
     const start = match.index ?? 0;
     const before = title.slice(cursor, start);
     result += before;
-    const afterBreak = i === 0 || /[:(\/[-]\s*$/.test(result);
+    const afterBreak = i === 0 || /[-:[(/]\s*$/.test(result);
     result += formatWord(match[0], afterBreak || i === last);
     cursor = start + match[0].length;
   }

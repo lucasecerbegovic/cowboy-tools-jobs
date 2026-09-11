@@ -78,7 +78,6 @@ export function OgInkCanvas({
             'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 60px)',
         }}
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={logoUrl}
         alt={OG_SITE_NAME}

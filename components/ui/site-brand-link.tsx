@@ -27,7 +27,6 @@ export function SiteBrandLink({ tone, className }: SiteBrandLinkProps) {
       aria-label={`${SITE_NAME} home`}
       className={`inline-flex min-w-0 items-center gap-2.5 hover:opacity-70 ${className ?? ''}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={SITE_LOGO_PATH}
         alt=""

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+// Web/HTTP client — native libsql breaks Next/webpack on Vercel.
+import { PrismaLibSQL } from '@prisma/adapter-libsql/web';
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
