@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { isGenericEmployerName } from '@/lib/employer-logo';
 import { prisma } from '@/lib/prisma';
 import {
@@ -21,27 +22,154 @@ function toMappedJob(row: JobWithEmployer): Job {
   });
 }
 
+/*
+ * Turso's free plan blocks every read once the monthly row-read quota is
+ * spent ("SQL read operations are forbidden"), which took the whole site down
+ * from Sep 15 to Oct 1 2026. Every page used to hit the database on every
+ * request (/jobs reads the full table), so crawler traffic burned the quota.
+ * Reads now go through the Next data cache (shared across instances) for 10
+ * minutes. postJob() revalidates the tag so new posts still go live
+ * immediately.
+ */
+export const JOBS_CACHE_TAG = 'jobs';
+const CACHE_SECONDS = 600;
+
+const cachedCount = unstable_cache(
+  async () => prisma.job.count({ where: { country: 'CA' } }),
+  ['jobs-count-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
 export async function countJobs(): Promise<number> {
-  return prisma.job.count({ where: { country: 'CA' } });
+  return cachedCount();
 }
 
-export async function listJobs(opts: { take?: number } = {}): Promise<Job[]> {
+async function readJobs(take?: number): Promise<Job[]> {
   const rows = await prisma.job.findMany({
     where: { country: 'CA' },
     orderBy: { postedAt: 'desc' },
-    take: opts.take,
+    take,
     include: { employer: true },
   });
   return rows.map(toMappedJob);
 }
 
+const cachedRecent = unstable_cache(
+  async (take: number) => readJobs(take),
+  ['jobs-recent-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+/*
+ * The full board is ~3.3 MB as mapped jobs, over the 2 MB data-cache item
+ * limit. List views only need the listing-row fields, so cache a slim copy in
+ * chunks that each fit comfortably under the limit.
+ */
+const LIST_CHUNK = 1000;
+
+const cachedListChunk = unstable_cache(
+  async (index: number): Promise<Job[]> => {
+    const rows = await prisma.job.findMany({
+      where: { country: 'CA' },
+      orderBy: [{ postedAt: 'desc' }, { id: 'asc' }],
+      skip: index * LIST_CHUNK,
+      take: LIST_CHUNK,
+      select: {
+        id: true,
+        source: true,
+        title: true,
+        company: true,
+        trade: true,
+        country: true,
+        region: true,
+        city: true,
+        isApprenticeship: true,
+        employmentType: true,
+        salaryMin: true,
+        salaryMax: true,
+        payUnit: true,
+        postedAt: true,
+        expiresAt: true,
+        union: true,
+        employerSlug: true,
+        employer: { select: { logoUrl: true, website: true } },
+      },
+    });
+    return rows.map((row) => {
+      const job = toMappedJob({
+        ...row,
+        description: '',
+        applyUrl: null,
+        experience: '',
+        responsibilities: null,
+      });
+      return { ...job, summary: '', responsibilities: [] };
+    });
+  },
+  ['jobs-list-chunk-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+async function readAllListJobs(): Promise<Job[]> {
+  const total = await cachedCount();
+  const chunks = await Promise.all(
+    Array.from({ length: Math.max(1, Math.ceil(total / LIST_CHUNK)) }, (_, i) =>
+      cachedListChunk(i),
+    ),
+  );
+  // Chunks can expire at different times; never render a job twice.
+  const seen = new Set<string>();
+  const jobs: Job[] = [];
+  for (const job of chunks.flat()) {
+    if (seen.has(job.id)) continue;
+    seen.add(job.id);
+    jobs.push(job);
+  }
+  return jobs;
+}
+
+/**
+ * With `take`, full jobs for the homepage. Without it, the whole board for
+ * /jobs with listing-row fields only (summary, responsibilities, applyUrl and
+ * experience are blank; use getJob() for a detail view).
+ */
+export async function listJobs(opts: { take?: number } = {}): Promise<Job[]> {
+  if (opts.take !== undefined) return cachedRecent(opts.take);
+  return readAllListJobs();
+}
+
+const cachedJob = unstable_cache(
+  async (id: string): Promise<Job | null> => {
+    const row = await prisma.job.findUnique({
+      where: { id },
+      include: { employer: true },
+    });
+    if (!row || row.country !== 'CA') return null;
+    return toMappedJob(row);
+  },
+  ['job-by-id-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
 export async function getJob(id: string): Promise<Job | undefined> {
-  const row = await prisma.job.findUnique({
-    where: { id },
-    include: { employer: true },
-  });
-  if (!row || row.country !== 'CA') return undefined;
-  return toMappedJob(row);
+  return (await cachedJob(id)) ?? undefined;
+}
+
+const cachedEmployerVerified = unstable_cache(
+  async (slug: string): Promise<boolean> => {
+    const row = await prisma.employer.findUnique({
+      where: { slug },
+      select: { verified: true, country: true },
+    });
+    return Boolean(row && row.country === 'CA' && row.verified);
+  },
+  ['employer-verified-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+/** One-row lookup; the job page only needs the verified flag. */
+export async function isEmployerVerified(slug: string): Promise<boolean> {
+  return cachedEmployerVerified(slug);
 }
 
 export async function jobsForEmployer(slug: string): Promise<Job[]> {

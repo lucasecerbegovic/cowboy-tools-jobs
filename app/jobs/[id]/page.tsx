@@ -14,7 +14,7 @@ import {
   formatPosted,
 } from '@/lib/jobs';
 import { OG_SITE_NAME } from '@/lib/site';
-import { getEmployer, getJob } from '@/lib/store';
+import { getJob, isEmployerVerified } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +51,7 @@ export default async function JobDetail({
   if (!job) notFound();
 
   const hasPay = job.payMin !== undefined;
-  const employer = await getEmployer(job.employerSlug);
+  const employerVerified = await isEmployerVerified(job.employerSlug);
   const apply = applyTarget(job);
 
   /* Spec table — labels mono, values Geist, hairline rules between rows. */
@@ -90,7 +90,7 @@ export default async function JobDetail({
             {job.source === 'job_bank' && <Badge>Job Bank</Badge>}
             {job.source === 'adzuna' && <Badge>Jobs by Adzuna</Badge>}
             {job.union && <Badge tone="union">Union</Badge>}
-            {!isGenericEmployerName(job.employer) && employer?.verified && (
+            {!isGenericEmployerName(job.employer) && employerVerified && (
               <Badge tone="success">Verified employer</Badge>
             )}
           </div>

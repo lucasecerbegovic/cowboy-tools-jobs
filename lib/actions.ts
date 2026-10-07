@@ -1,4 +1,8 @@
+'use server';
+
+import { revalidateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { JOBS_CACHE_TAG } from '@/lib/store';
 import type { FormState } from '@/lib/form-state';
 import { APPLY_SCHEMA, POST_JOB_SCHEMA } from '@/lib/schemas';
 import { formToRecord, validateAll, type Errors } from '@/lib/validate';
@@ -99,6 +103,9 @@ export async function postJob(
       employerSlug: slug,
     },
   });
+
+  // Listings go live immediately: drop cached job reads.
+  revalidateTag(JOBS_CACHE_TAG);
 
   return { status: 'success', errors: {}, values };
 }
