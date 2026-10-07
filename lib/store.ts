@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { isGenericEmployerName } from '@/lib/employer-logo';
 import { prisma } from '@/lib/prisma';
 import {
@@ -21,27 +22,99 @@ function toMappedJob(row: JobWithEmployer): Job {
   });
 }
 
-export async function countJobs(): Promise<number> {
-  return prisma.job.count({ where: { country: 'CA' } });
+/*
+ * Turso's free plan blocks every read once the monthly row-read quota is
+ * spent ("SQL read operations are forbidden"), which took the whole site down
+ * from Sep 15 to Oct 1 2026. Every page used to hit the database on every
+ * request (/jobs reads the full table), so crawler traffic burned the quota.
+ * Reads now go through the Next data cache (shared across instances) plus a
+ * short in-memory memo for the full list, which can exceed the 2 MB data-cache
+ * item limit. postJob() calls revalidateJobs() so new posts still go live.
+ */
+export const JOBS_CACHE_TAG = 'jobs';
+const CACHE_SECONDS = 600;
+
+let memoAll: { at: number; jobs: Job[] } | undefined;
+
+/** Call after any write to jobs/employers. */
+export function clearJobsMemo(): void {
+  memoAll = undefined;
 }
 
-export async function listJobs(opts: { take?: number } = {}): Promise<Job[]> {
+const cachedCount = unstable_cache(
+  async () => prisma.job.count({ where: { country: 'CA' } }),
+  ['jobs-count-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+export async function countJobs(): Promise<number> {
+  return cachedCount();
+}
+
+async function readJobs(take?: number): Promise<Job[]> {
   const rows = await prisma.job.findMany({
     where: { country: 'CA' },
     orderBy: { postedAt: 'desc' },
-    take: opts.take,
+    take,
     include: { employer: true },
   });
   return rows.map(toMappedJob);
 }
 
+const cachedRecent = unstable_cache(
+  async (take: number) => readJobs(take),
+  ['jobs-recent-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+const cachedAll = unstable_cache(
+  async () => readJobs(),
+  ['jobs-all-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+export async function listJobs(opts: { take?: number } = {}): Promise<Job[]> {
+  if (opts.take !== undefined) return cachedRecent(opts.take);
+  if (memoAll && Date.now() - memoAll.at < CACHE_SECONDS * 1000) {
+    return memoAll.jobs;
+  }
+  const jobs = await cachedAll();
+  memoAll = { at: Date.now(), jobs };
+  return jobs;
+}
+
+const cachedJob = unstable_cache(
+  async (id: string): Promise<Job | null> => {
+    const row = await prisma.job.findUnique({
+      where: { id },
+      include: { employer: true },
+    });
+    if (!row || row.country !== 'CA') return null;
+    return toMappedJob(row);
+  },
+  ['job-by-id-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
 export async function getJob(id: string): Promise<Job | undefined> {
-  const row = await prisma.job.findUnique({
-    where: { id },
-    include: { employer: true },
-  });
-  if (!row || row.country !== 'CA') return undefined;
-  return toMappedJob(row);
+  return (await cachedJob(id)) ?? undefined;
+}
+
+const cachedEmployerVerified = unstable_cache(
+  async (slug: string): Promise<boolean> => {
+    const row = await prisma.employer.findUnique({
+      where: { slug },
+      select: { verified: true, country: true },
+    });
+    return Boolean(row && row.country === 'CA' && row.verified);
+  },
+  ['employer-verified-v1'],
+  { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
+);
+
+/** One-row lookup; the job page only needs the verified flag. */
+export async function isEmployerVerified(slug: string): Promise<boolean> {
+  return cachedEmployerVerified(slug);
 }
 
 export async function jobsForEmployer(slug: string): Promise<Job[]> {
