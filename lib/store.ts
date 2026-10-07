@@ -27,19 +27,12 @@ function toMappedJob(row: JobWithEmployer): Job {
  * spent ("SQL read operations are forbidden"), which took the whole site down
  * from Sep 15 to Oct 1 2026. Every page used to hit the database on every
  * request (/jobs reads the full table), so crawler traffic burned the quota.
- * Reads now go through the Next data cache (shared across instances) plus a
- * short in-memory memo for the full list, which can exceed the 2 MB data-cache
- * item limit. postJob() calls revalidateJobs() so new posts still go live.
+ * Reads now go through the Next data cache (shared across instances) for 10
+ * minutes. postJob() revalidates the tag so new posts still go live
+ * immediately.
  */
 export const JOBS_CACHE_TAG = 'jobs';
 const CACHE_SECONDS = 600;
-
-let memoAll: { at: number; jobs: Job[] } | undefined;
-
-/** Call after any write to jobs/employers. */
-export function clearJobsMemo(): void {
-  memoAll = undefined;
-}
 
 const cachedCount = unstable_cache(
   async () => prisma.job.count({ where: { country: 'CA' } }),
@@ -67,20 +60,82 @@ const cachedRecent = unstable_cache(
   { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
 );
 
-const cachedAll = unstable_cache(
-  async () => readJobs(),
-  ['jobs-all-v1'],
+/*
+ * The full board is ~3.3 MB as mapped jobs, over the 2 MB data-cache item
+ * limit. List views only need the listing-row fields, so cache a slim copy in
+ * chunks that each fit comfortably under the limit.
+ */
+const LIST_CHUNK = 1000;
+
+const cachedListChunk = unstable_cache(
+  async (index: number): Promise<Job[]> => {
+    const rows = await prisma.job.findMany({
+      where: { country: 'CA' },
+      orderBy: [{ postedAt: 'desc' }, { id: 'asc' }],
+      skip: index * LIST_CHUNK,
+      take: LIST_CHUNK,
+      select: {
+        id: true,
+        source: true,
+        title: true,
+        company: true,
+        trade: true,
+        country: true,
+        region: true,
+        city: true,
+        isApprenticeship: true,
+        employmentType: true,
+        salaryMin: true,
+        salaryMax: true,
+        payUnit: true,
+        postedAt: true,
+        expiresAt: true,
+        union: true,
+        employerSlug: true,
+        employer: { select: { logoUrl: true, website: true } },
+      },
+    });
+    return rows.map((row) => {
+      const job = toMappedJob({
+        ...row,
+        description: '',
+        applyUrl: null,
+        experience: '',
+        responsibilities: null,
+      });
+      return { ...job, summary: '', responsibilities: [] };
+    });
+  },
+  ['jobs-list-chunk-v1'],
   { revalidate: CACHE_SECONDS, tags: [JOBS_CACHE_TAG] },
 );
 
+async function readAllListJobs(): Promise<Job[]> {
+  const total = await cachedCount();
+  const chunks = await Promise.all(
+    Array.from({ length: Math.max(1, Math.ceil(total / LIST_CHUNK)) }, (_, i) =>
+      cachedListChunk(i),
+    ),
+  );
+  // Chunks can expire at different times; never render a job twice.
+  const seen = new Set<string>();
+  const jobs: Job[] = [];
+  for (const job of chunks.flat()) {
+    if (seen.has(job.id)) continue;
+    seen.add(job.id);
+    jobs.push(job);
+  }
+  return jobs;
+}
+
+/**
+ * With `take`, full jobs for the homepage. Without it, the whole board for
+ * /jobs with listing-row fields only (summary, responsibilities, applyUrl and
+ * experience are blank; use getJob() for a detail view).
+ */
 export async function listJobs(opts: { take?: number } = {}): Promise<Job[]> {
   if (opts.take !== undefined) return cachedRecent(opts.take);
-  if (memoAll && Date.now() - memoAll.at < CACHE_SECONDS * 1000) {
-    return memoAll.jobs;
-  }
-  const jobs = await cachedAll();
-  memoAll = { at: Date.now(), jobs };
-  return jobs;
+  return readAllListJobs();
 }
 
 const cachedJob = unstable_cache(
